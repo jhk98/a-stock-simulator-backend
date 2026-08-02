@@ -1,0 +1,41 @@
+# ── 시크릿 (무엇보다 먼저) ─────────────────────────────────────────────
+.env
+.env.*
+*.pem
+*.key
+*.jks
+*.keystore
+secrets.*
+**/application-local.*
+
+# ── OS / 에디터 ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# ── 빌드 산출물 (스택 정해지면 추려낸다) ──────────────────────────────
+build/
+out/
+target/
+dist/
+bin/
+*.class
+*.log
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Gradle / Maven
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
