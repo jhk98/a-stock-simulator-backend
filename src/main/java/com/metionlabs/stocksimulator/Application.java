@@ -20,9 +20,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * "분명 @Service 붙였는데 주입이 안 된다" 는 상황이 생긴다.
  */
 @SpringBootApplication
-public class AStockSimulatorApplication {
+public class Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(AStockSimulatorApplication.class, args);
+        SpringApplication.run(Application.class, args);
+
+//        new Member();
+//        new CustomAccountRepository();
+//        new AccountRepository();
     }
 }

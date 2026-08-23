@@ -39,6 +39,7 @@ dependencies {
 	//    옛날 블로그를 보고 web 이라고 적으면 못 찾는다.
 	// 내장 톰캣 + Spring MVC + JSON 변환(Jackson)이 한 번에 딸려온다.
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
+	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
 	// ------------------------------------------------------------------------
 	// DB 접근 (JPA)
@@ -64,11 +65,8 @@ dependencies {
 	// runtimeOnly = 컴파일에는 필요 없고 실행할 때만 필요하다는 뜻.
 	// 우리 코드는 JPA 인터페이스만 쓰고 H2 클래스를 직접 참조하지 않으므로
 	// 이렇게 두면 "실수로 특정 DB 전용 코드를 쓰는 것" 도 컴파일 단계에서 막힌다.
-	//
-	// ⚠️ H2 는 MySQL 을 "흉내" 낼 뿐이다. 예약어·날짜함수·정렬·FK 동작이 미묘하게
-	//    달라서, H2 에서 통과한 테스트가 실제 MySQL 에서 깨지는 일이 있다.
-	//    스키마가 자리 잡으면 실제 MySQL 로 옮기는 걸 권한다.
-	runtimeOnly("com.h2database:h2")
+
+	runtimeOnly("com.mysql:mysql-connector-j")
 
 	// ------------------------------------------------------------------------
 	// 테스트
@@ -78,6 +76,16 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	// 컴파일 전용 + 어노테이션 프로세서로 설정(?)
+//	implementation("org.projectlombok:lombok:1.18.46")
+
+	compileOnly("org.projectlombok:lombok:1.18.46")
+	annotationProcessor("org.projectlombok:lombok:1.18.46")
+
+	testCompileOnly("org.projectlombok:lombok:1.18.46")
+	testAnnotationProcessor("org.projectlombok:lombok:1.18.46")
+
 }
 
 tasks.withType<Test> {

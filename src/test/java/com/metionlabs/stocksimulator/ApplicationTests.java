@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * 즉 "일단 켜지긴 하는가" 를 지켜주는 최소한의 안전망이다.
  */
 @SpringBootTest
-class AStockSimulatorApplicationTests {
+class ApplicationTests {
 
     @Test
     void 컨텍스트가_뜬다() {
