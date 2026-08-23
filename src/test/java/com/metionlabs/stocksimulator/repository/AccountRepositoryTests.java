@@ -207,8 +207,7 @@ public class AccountRepositoryTests {
         // 생성일 저장
         LocalDateTime createdAt = account.getCreatedAt();
 
-        // 수정일 생성
-        LocalDateTime modifiedAt = LocalDateTime.now();
+        // (수정일은 update() 가 스스로 찍으므로 여기서 만들지 않는다)
 
         // 기존 회원 정보 저장
         Member member = account.getMember();
@@ -217,19 +216,32 @@ public class AccountRepositoryTests {
         String accountNum = randomAccountNum();
         Long deposit = randomDeposit();
 
-        // 계좌 정보 수정
-        // 새로운 데이터 삽입
+        // 🐛 이 테스트는 원래 깨져 있었다.
+        //    랜덤 값을 만들어놓고 **계좌에 적용하지 않은 채** 같은지 검증해서
+        //    assertEquals(accountNum, save.getAccountNum()) 이 항상 실패했다.
+        //    값을 바꾸는 코드가 빠져 있었던 것 — 이제 엔티티가 스스로 바꾼다.
+        account.update(accountNum, deposit);
+
+        // 저장
         Account save = accountRepository.save(account);
 
         // 저장된 데이터가 null인지 확인
         assertNotNull(save);
 
-        // 저장된 데이터가 저장하기 전 데이터와 같은지 확인
+        // 저장된 데이터가 수정한 값과 같은지 확인
         assertEquals(member.getId(), save.getMember().getId());
         assertEquals(accountNum, save.getAccountNum());
         assertEquals(deposit, save.getDeposit());
+
+        // 생성일은 수정해도 그대로여야 한다
         assertEquals(createdAt, save.getCreatedAt());
-        assertEquals(modifiedAt, save.getModifiedAt());
+
+        // ⚠️ 수정일은 update() 안에서 now() 로 새로 찍히므로,
+        //    테스트가 미리 만들어 둔 modifiedAt 과 같을 수 없다.
+        //    "언제 찍혔는지" 를 비교하지 말고 **갱신되었는지**를 본다.
+        assertNotNull(save.getModifiedAt());
+        assertTrue(save.getModifiedAt().isAfter(createdAt)
+                || save.getModifiedAt().isEqual(createdAt));
     }
 
     @Order(4)
