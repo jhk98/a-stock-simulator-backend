@@ -4,17 +4,15 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Table(name="a_stock_daily_price")
 @Entity
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
-public class DailyPrice {
+public class DailyPrice extends Object {
 
     // 주식 종목 가격 테이블 아이디
     @Id
@@ -51,7 +49,33 @@ public class DailyPrice {
     @Column(name="report_time", nullable = false)
     private LocalDateTime reportTime;
 
+    // JPA가 DB 데이터를 엔티티 객체로 생성할 때 사용하는 기본 생성자
+    // 외부에서 빈 객체를 직접 생성하지 못하도록 protected로 선언
     protected DailyPrice() {
+    }
+
+    // 주식 종목 가격 수정 메서드
+    public void update(Long openPrice,
+                       Long closePrice,
+                       Long highPrice,
+                       Long lowPrice,
+                       Long volume) {
+        if(openPrice != null) {
+            this.openPrice = openPrice;
+        }
+        if(closePrice != null) {
+            this.closePrice = closePrice;
+        }
+        if(highPrice != null) {
+            this.highPrice = highPrice;
+        }
+        if(lowPrice != null) {
+            this.lowPrice = lowPrice;
+        }
+        if(volume != null) {
+            this.volume = volume;
+        }
+        this.reportTime = LocalDateTime.now();
     }
 
 }

@@ -1,57 +1,73 @@
 package com.metionlabs.stocksimulator.controller;
 
+import com.metionlabs.stocksimulator.controller.dto.dailyPrice.DailyPriceGetResult;
+import com.metionlabs.stocksimulator.controller.dto.dailyPrice.DailyPricePatchCommand;
+import com.metionlabs.stocksimulator.controller.dto.dailyPrice.DailyPricePostCommand;
+import com.metionlabs.stocksimulator.controller.dto.dailyPrice.DailyPricePostResult;
 import com.metionlabs.stocksimulator.domain.DailyPrice;
-import com.metionlabs.stocksimulator.domain.Stock;
-import com.metionlabs.stocksimulator.repository.DailyPriceRepository;
-import com.metionlabs.stocksimulator.repository.StockRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.metionlabs.stocksimulator.service.DailyPriceService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/dailyPrices")
 public class DailyPriceController {
 
-    @Autowired
-    DailyPriceRepository dailyPriceRepository;
+    private final DailyPriceService dailyPriceService;
 
-    @Autowired
-    StockRepository stockRepository;
+    public DailyPriceController(DailyPriceService dailyPriceService) {
+        this.dailyPriceService = dailyPriceService;
+    }
 
+    // ========================================================================
+    // C — POST /dailyPrices
+    // ========================================================================
+
+    // 주식 종목 가격 생성
+    @PostMapping
+    public ResponseEntity<DailyPricePostResult> post(@RequestBody @Valid DailyPricePostCommand command) {
+        DailyPrice dailyPrice = dailyPriceService.create(command);
+        return ResponseEntity.ok(new DailyPricePostResult(dailyPrice.getId()));
+    }
+
+    // ========================================================================
+    // R — GET /dailyPrices/{id}, GET /dailyPrices?stockId=
+    // ========================================================================
+
+    // 주식 종목 가격 단건 조회
     @GetMapping("/{id}")
-    public ResponseEntity<DailyPrice> get(@PathVariable Long id) {
-        DailyPrice dailyPrice = dailyPriceRepository.findById(id).orElseThrow();
-        return ResponseEntity.ok(dailyPrice);
+    public ResponseEntity<DailyPriceGetResult> get(@PathVariable Long id) {
+        DailyPrice dailyPrice = dailyPriceService.getById(id);
+        return ResponseEntity.ok(DailyPriceGetResult.from(dailyPrice));
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> post(
-            @RequestBody DailyPrice dailyPrice,
-            @RequestParam Long stockId) {
-        Stock stock = stockRepository.findById(stockId).orElseThrow();
-
-        LocalDateTime localDateTime = LocalDateTime.now();
-
-        dailyPrice.setStock(stock);
-        dailyPrice.setReportTime(localDateTime);
-
-        dailyPriceRepository.save(dailyPrice);
-
-//        return new ResponseEntity<>(HttpStatus.OK);
-        return ResponseEntity.ok("created");
+    // 주식ID로 주식 종목 가격 조회
+    @GetMapping(params = "stockId")
+    public ResponseEntity<DailyPriceGetResult> getByStock(@RequestParam Long stockId) {
+        DailyPrice dailyPrice = dailyPriceService.getByStockId(stockId);
+        return ResponseEntity.ok(DailyPriceGetResult.from(dailyPrice));
     }
 
+    // ========================================================================
+    // U — PATCH /dailyPrices/{id}
+    // ========================================================================
+
+    // 주식 종목 가격 부분 수정
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patch(@PathVariable Long id) {
-//        return new ResponseEntity<>(HttpStatus.OK);
-        return ResponseEntity.ok(id);
+    public ResponseEntity<DailyPriceGetResult> update(@PathVariable Long id,
+                                                      @RequestBody @Valid DailyPricePatchCommand command) {
+        DailyPrice dailyPrice = dailyPriceService.update(id, command);
+        return ResponseEntity.ok(DailyPriceGetResult.from(dailyPrice));
     }
+
+    // ========================================================================
+    // D — DELETE /dailyPrices/{id}
+    // ========================================================================
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-//        return new ResponseEntity<>(HttpStatus.OK);
-        return ResponseEntity.ok(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        dailyPriceService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -4,14 +4,12 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Table(name="a_stock_orders")
 @Entity
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
 public class Orders {
@@ -52,7 +50,18 @@ public class Orders {
     @Column(name="created_at")
     private LocalDateTime createdAt;
 
+    // JPA가 DB 데이터를 엔티티 객체로 생성할 때 사용하는 기본 생성자
+    // 외부에서 빈 객체를 직접 생성하지 못하도록 protected로 선언
     protected Orders() {
     }
 
+    // 주문 정보 수정 메서드
+    public void update(Long orderPrice, Integer quantity) {
+        if(orderPrice != null) {
+            this.orderPrice = orderPrice;
+        }
+        if(quantity != null) {
+            this.quantity = quantity;
+        }
+    }
 }

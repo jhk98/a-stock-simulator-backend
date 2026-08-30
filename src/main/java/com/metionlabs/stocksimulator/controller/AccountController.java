@@ -1,9 +1,9 @@
 package com.metionlabs.stocksimulator.controller;
 
-import com.metionlabs.stocksimulator.controller.dto.AccountGetResult;
-import com.metionlabs.stocksimulator.controller.dto.AccountPatchCommand;
-import com.metionlabs.stocksimulator.controller.dto.AccountPostCommand;
-import com.metionlabs.stocksimulator.controller.dto.AccountPostResult;
+import com.metionlabs.stocksimulator.controller.dto.account.AccountGetResult;
+import com.metionlabs.stocksimulator.controller.dto.account.AccountPatchCommand;
+import com.metionlabs.stocksimulator.controller.dto.account.AccountPostCommand;
+import com.metionlabs.stocksimulator.controller.dto.account.AccountPostResult;
 import com.metionlabs.stocksimulator.domain.Account;
 import com.metionlabs.stocksimulator.service.AccountService;
 import jakarta.validation.Valid;

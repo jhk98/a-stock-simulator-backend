@@ -1,4 +1,4 @@
-package com.metionlabs.stocksimulator.controller.dto;
+package com.metionlabs.stocksimulator.controller.dto.account;
 
 import lombok.Getter;
 

@@ -1,65 +1,78 @@
 package com.metionlabs.stocksimulator.controller;
 
-import com.metionlabs.stocksimulator.domain.Account;
+import com.metionlabs.stocksimulator.controller.dto.orders.OrdersGetResult;
+import com.metionlabs.stocksimulator.controller.dto.orders.OrdersPatchCommand;
+import com.metionlabs.stocksimulator.controller.dto.orders.OrdersPostCommand;
+import com.metionlabs.stocksimulator.controller.dto.orders.OrdersPostResult;
 import com.metionlabs.stocksimulator.domain.Orders;
-import com.metionlabs.stocksimulator.domain.Stock;
-import com.metionlabs.stocksimulator.repository.AccountRepository;
-import com.metionlabs.stocksimulator.repository.OrdersRepository;
-import com.metionlabs.stocksimulator.repository.StockRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.metionlabs.stocksimulator.service.OrdersService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/orders")
 public class OrdersController {
 
-    @Autowired
-    OrdersRepository ordersRepository;
+    private final OrdersService ordersService;
 
-    @Autowired
-    StockRepository stockRepository;
+    public OrdersController(OrdersService ordersService) {
+        this.ordersService = ordersService;
+    }
 
-    @Autowired
-    AccountRepository accountRepository;
+    // ========================================================================
+    // C — POST /orders
+    // ========================================================================
 
+    @PostMapping
+    public ResponseEntity<OrdersPostResult> create(@RequestBody @Valid OrdersPostCommand command) {
+        Orders orders = ordersService.create(command);
+        return ResponseEntity.ok(new OrdersPostResult(orders.getId()));
+    }
+
+    // ========================================================================
+    // R — GET /orders/{id}, GET /orders?stockId=, GET /orders?accountId=
+    // ========================================================================
+
+    // 주문 단건 조회
     @GetMapping("/{id}")
-    public ResponseEntity<Orders> get(@PathVariable Long id) {
-        Orders orders = ordersRepository.findById(id).orElseThrow();
-        return ResponseEntity.ok(orders);
+    public ResponseEntity<OrdersGetResult> get(@PathVariable Long id) {
+        Orders orders = ordersService.getById(id);
+        return ResponseEntity.ok(OrdersGetResult.from(orders));
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> post(
-            @RequestBody Orders orders,
-            @RequestParam Long stockId,
-            @RequestParam Long accountId) {
-        Stock stock = stockRepository.findById(stockId).orElseThrow();
-        Account account = accountRepository.findById(accountId).orElseThrow();
-
-        LocalDateTime localDateTime = LocalDateTime.now();
-
-        orders.setStock(stock);
-        orders.setAccount(account);
-        orders.setCreatedAt(localDateTime);
-
-        ordersRepository.save(orders);
-
-//        return new ResponseEntity<>(HttpStatus.OK);
-        return ResponseEntity.ok("created");
+    // 주식ID로 주문 조회
+    @GetMapping(params = "stockId")
+    public ResponseEntity<OrdersGetResult> getByStock(@RequestParam Long stockId) {
+        Orders orders = ordersService.getByStockId(stockId);
+        return ResponseEntity.ok(OrdersGetResult.from(orders));
     }
+
+    // 계좌ID로 주문 조회
+    @GetMapping(params = "accountId")
+    public ResponseEntity<OrdersGetResult> getByAccount(@RequestParam Long accountId) {
+        Orders orders = ordersService.getByAccountId(accountId);
+        return ResponseEntity.ok(OrdersGetResult.from(orders));
+    }
+
+    // ========================================================================
+    // U — PATCH /orders/{id}
+    // ========================================================================
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patch(@PathVariable Long id) {
-//        return new ResponseEntity<>(HttpStatus.OK);
-        return ResponseEntity.ok(id);
+    public ResponseEntity<OrdersGetResult> update(@PathVariable Long id,
+                                                  @RequestBody @Valid OrdersPatchCommand command) {
+        Orders orders = ordersService.update(id, command);
+        return ResponseEntity.ok(OrdersGetResult.from(orders));
     }
 
+    // ========================================================================
+    // D — DELETE /orders/{id}
+    // ========================================================================
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-//        return new ResponseEntity<>(HttpStatus.OK);
-        return ResponseEntity.ok(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        ordersService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

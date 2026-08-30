@@ -1,5 +1,7 @@
 package com.metionlabs.stocksimulator;
 
+import com.metionlabs.stocksimulator.domain.Account;
+import com.metionlabs.stocksimulator.domain.DailyPrice;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -17,5 +19,29 @@ class ApplicationTests {
     void 컨텍스트가_뜬다() {
         // 이 메서드가 비어 있는 게 맞다.
         // @SpringBootTest 가 컨텍스트를 띄우는 것 자체가 검증이다.
+    }
+
+    @Test
+    void something() {
+//
+//        // 1
+//        account.update(newAccountNum, command.getDeposit());
+//
+//        // 2
+//        Account updated = account.update2(newAccountNum, command.getDeposit());
+//
+//        DailyPrice dailyPrice1 = DailyPrice.builder()
+//                .id(1L)
+//                .build();
+//
+//        DailyPrice dailyPrice2 = DailyPrice.builder()
+//                .id(1L)
+//                .build();
+//
+//
+//        dailyPrice1 == dailyPrice2
+
+
+        System.out.println("hi");
     }
 }

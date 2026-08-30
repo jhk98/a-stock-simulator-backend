@@ -48,7 +48,19 @@ public class Holding {
     @Column(name="modified_at")
     private LocalDateTime modifiedAt;
 
+    // JPA가 DB 데이터를 엔티티 객체로 생성할 때 사용하는 기본 생성자
+    // 외부에서 빈 객체를 직접 생성하지 못하도록 protected로 선언
     protected Holding() {
     }
 
+    // 회원 보유 주식 정보 수정 메서드
+    public void update(Integer quantity, Long avgPrice) {
+        if(quantity != null) {
+            this.quantity = quantity;
+        }
+        if(avgPrice != null) {
+            this.avgPrice = avgPrice;
+        }
+        this.modifiedAt = LocalDateTime.now();
+    }
 }

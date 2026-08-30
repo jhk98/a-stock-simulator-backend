@@ -1,66 +1,80 @@
 package com.metionlabs.stocksimulator.controller;
 
-import com.metionlabs.stocksimulator.domain.Account;
+import com.metionlabs.stocksimulator.controller.dto.holding.HoldingGetResult;
+import com.metionlabs.stocksimulator.controller.dto.holding.HoldingPatchCommand;
+import com.metionlabs.stocksimulator.controller.dto.holding.HoldingPostCommand;
+import com.metionlabs.stocksimulator.controller.dto.holding.HoldingPostResult;
 import com.metionlabs.stocksimulator.domain.Holding;
-import com.metionlabs.stocksimulator.domain.Stock;
-import com.metionlabs.stocksimulator.repository.AccountRepository;
-import com.metionlabs.stocksimulator.repository.HoldingRepository;
-import com.metionlabs.stocksimulator.repository.StockRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.metionlabs.stocksimulator.service.HoldingService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/holdings")
 public class HoldingController {
 
-    @Autowired
-    HoldingRepository holdingRepository;
+    private final HoldingService holdingService;
 
-    @Autowired
-    StockRepository stockRepository;
+    public HoldingController(HoldingService holdingservice) {
+        this.holdingService = holdingservice;
+    }
 
-    @Autowired
-    AccountRepository accountRepository;
+    // ========================================================================
+    // C — POST /holdings
+    // ========================================================================
 
+    // 회원 보유 주식 생성
+    @PostMapping
+    public ResponseEntity<HoldingPostResult> create(@RequestBody @Valid HoldingPostCommand command) {
+        Holding holding = holdingService.create(command);
+        return ResponseEntity.ok(new HoldingPostResult(holding.getId()));
+    }
+
+    // ========================================================================
+    // R — GET /holdings/{id}, GET /holdings?stockId=, GET /holdings?accountId=
+    // ========================================================================
+
+    // 회원 보유 주식 단건 조회
     @GetMapping("/{id}")
-    public ResponseEntity<Holding> get(@PathVariable Long id) {
-        Holding holding = holdingRepository.findById(id).orElseThrow();
-        return ResponseEntity.ok(holding);
+    public ResponseEntity<HoldingGetResult> get(@PathVariable Long id) {
+        Holding holding = holdingService.getById(id);
+        return ResponseEntity.ok(HoldingGetResult.from(holding));
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> post(
-            @RequestBody Holding holding,
-            @RequestParam Long stockId,
-            @RequestParam Long accountId) {
-        Stock stock = stockRepository.findById(stockId).orElseThrow();
-        Account account = accountRepository.findById(accountId).orElseThrow();
-
-        LocalDateTime localDateTime = LocalDateTime.now();
-
-        holding.setStock(stock);
-        holding.setAccount(account);
-        holding.setCreatedAt(localDateTime);
-        holding.setModifiedAt(localDateTime);
-
-        holdingRepository.save(holding);
-
-//        return new ResponseEntity<>(HttpStatus.OK);
-        return ResponseEntity.ok("created");
+    // 주식ID로 회원 보유 주식 조회
+    @GetMapping(params = "stockId")
+    public ResponseEntity<HoldingGetResult> getByStock(@RequestParam Long stockId) {
+        Holding holding = holdingService.getByStockId(stockId);
+        return ResponseEntity.ok(HoldingGetResult.from(holding));
     }
+
+    // 계좌ID로 회원 보유 주식 조회
+    @GetMapping(params = "accountId")
+    public ResponseEntity<HoldingGetResult> getByAccount(@RequestParam Long accountId) {
+        Holding holding = holdingService.getByAccountId(accountId);
+        return ResponseEntity.ok(HoldingGetResult.from(holding));
+    }
+
+    // ========================================================================
+    // U — PATCH /accounts/{id}
+    // ========================================================================
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patch(@PathVariable Long id) {
-//        return new ResponseEntity<>(HttpStatus.OK);
-        return ResponseEntity.ok(id);
+    public ResponseEntity<HoldingGetResult> update(@PathVariable Long id,
+                                                   @RequestBody @Valid HoldingPatchCommand command) {
+        Holding holding = holdingService.update(id, command);
+        return ResponseEntity.ok(HoldingGetResult.from(holding));
     }
 
+    // ========================================================================
+    // D — DELETE /accounts/{id}
+    // ========================================================================
+
+    // 회원 보유 주식 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-//        return new ResponseEntity<>(HttpStatus.OK);
-        return ResponseEntity.ok(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        holdingService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

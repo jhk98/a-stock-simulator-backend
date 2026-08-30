@@ -1,8 +1,9 @@
 package com.metionlabs.stocksimulator.service;
 
-import com.metionlabs.stocksimulator.controller.dto.AccountPatchCommand;
-import com.metionlabs.stocksimulator.controller.dto.AccountPostCommand;
+import com.metionlabs.stocksimulator.controller.dto.account.AccountPatchCommand;
+import com.metionlabs.stocksimulator.controller.dto.account.AccountPostCommand;
 import com.metionlabs.stocksimulator.domain.Account;
+import com.metionlabs.stocksimulator.domain.DailyPrice;
 import com.metionlabs.stocksimulator.domain.Member;
 import com.metionlabs.stocksimulator.repository.AccountRepository;
 import com.metionlabs.stocksimulator.repository.MemberRepository;
@@ -54,7 +55,7 @@ public class AccountService {
      *   <li>테스트에서 {@code new AccountService(mockRepo, mockRepo)} 로 바로 만들 수 있다.
      *       필드 주입은 스프링 컨텍스트를 띄우거나 리플렉션을 써야 한다</li>
      * </ul>
-     * 생성자가 하나뿐이면 {@code @Autowired} 는 생략해도 스프링이 알아서 쓴다.
+     * 생성자가 하나뿐이면 {@code @Autowired} 는 생략해도 스프링이 알아서 쓴다.입
      */
     public AccountService(AccountRepository accountRepository, MemberRepository memberRepository) {
         this.accountRepository = accountRepository;

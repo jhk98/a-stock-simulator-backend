@@ -1,57 +1,72 @@
 package com.metionlabs.stocksimulator.controller;
 
+import com.metionlabs.stocksimulator.controller.dto.currentPrice.CurrentPriceGetResult;
+import com.metionlabs.stocksimulator.controller.dto.currentPrice.CurrentPricePatchCommand;
+import com.metionlabs.stocksimulator.controller.dto.currentPrice.CurrentPricePostCommand;
+import com.metionlabs.stocksimulator.controller.dto.currentPrice.CurrentPricePostResult;
 import com.metionlabs.stocksimulator.domain.CurrentPrice;
-import com.metionlabs.stocksimulator.domain.Stock;
-import com.metionlabs.stocksimulator.repository.CurrentPriceRepository;
-import com.metionlabs.stocksimulator.repository.StockRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.metionlabs.stocksimulator.service.CurrentPriceService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/currentPrices")
 public class CurrentPriceController {
 
-    @Autowired
-    CurrentPriceRepository currentPriceRepository;
+    private final CurrentPriceService currentPriceService;
 
-    @Autowired
-    StockRepository stockRepository;
+    public CurrentPriceController(CurrentPriceService currentPriceService) {
+        this.currentPriceService = currentPriceService;
+    }
 
+    // ========================================================================
+    // C — POST /currentPrices
+    // ========================================================================
+
+    @PostMapping
+    public ResponseEntity<CurrentPricePostResult> post(@RequestBody @Valid CurrentPricePostCommand command) {
+        CurrentPrice currentPrice = currentPriceService.create(command);
+        return ResponseEntity.ok(new CurrentPricePostResult(currentPrice.getId()));
+    }
+
+    // ========================================================================
+    // R — GET /currentPrices/{id}, GET /currentPrices?stockId=
+    // ========================================================================
+
+    // 주식 현재가 단건 조회
     @GetMapping("/{id}")
-    public ResponseEntity<CurrentPrice> get(@PathVariable Long id) {
-        CurrentPrice currentPrice = currentPriceRepository.findById(id).orElseThrow();
-        return ResponseEntity.ok(currentPrice);
+    public ResponseEntity<CurrentPriceGetResult> get(@PathVariable Long id) {
+        CurrentPrice currentPrice = currentPriceService.getById(id);
+        return ResponseEntity.ok(CurrentPriceGetResult.from(currentPrice));
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> post(
-            @RequestBody CurrentPrice currentPrice,
-            @RequestParam Long stockId) {
-        Stock stock = stockRepository.findById(stockId).orElseThrow();
-
-        LocalDateTime localDateTime = LocalDateTime.now();
-
-        currentPrice.setStock(stock);
-        currentPrice.setUpdatedAt(localDateTime);
-
-        currentPriceRepository.save(currentPrice);
-
-//        return new ResponseEntity<>(HttpStatus.OK);
-        return ResponseEntity.ok("created");
+    // 주식ID로 주식 현재가 조회
+    @GetMapping(params = "stockId")
+    public ResponseEntity<CurrentPriceGetResult> getByStock(@RequestParam Long stockId) {
+        CurrentPrice currentPrice = currentPriceService.getByStockId(stockId);
+        return ResponseEntity.ok(CurrentPriceGetResult.from(currentPrice));
     }
 
+    // ========================================================================
+    // U — PATCH /currentPrices/{id}
+    // ========================================================================
+
+    // 주식 현재가 부분 수정
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patch(@PathVariable Long id) {
-//        return new ResponseEntity<>(HttpStatus.OK);
-        return ResponseEntity.ok(id);
+    public ResponseEntity<CurrentPriceGetResult> update(@PathVariable Long id,
+                                                        @RequestBody @Valid CurrentPricePatchCommand command) {
+        CurrentPrice currentPrice = currentPriceService.update(id, command);
+        return ResponseEntity.ok(CurrentPriceGetResult.from(currentPrice));
     }
+
+    // ========================================================================
+    // D — DELETE /currentPrices/{id}
+    // ========================================================================
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-//        return new ResponseEntity<>(HttpStatus.OK);
-        return ResponseEntity.ok(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        currentPriceService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -42,6 +41,8 @@ public class Account {
     @Column(name="modified_at")
     private LocalDateTime modifiedAt;
 
+    // JPA가 DB 데이터를 엔티티 객체로 생성할 때 사용하는 기본 생성자
+    // 외부에서 빈 객체를 직접 생성하지 못하도록 protected로 선언
     protected Account() {
     }
 
@@ -59,13 +60,25 @@ public class Account {
      * <p>null 인 인자는 "안 바꾼다" 는 뜻이다(PATCH 의미).
      * 그래서 예수금만 바꾸고 싶으면 accountNum 에 null 을 넘기면 된다.
      */
+    // 계좌 정보 수정 메서드
     public void update(String accountNum, Long deposit) {
-        if (accountNum != null) {
+        if(accountNum != null) {
             this.accountNum = accountNum;
         }
-        if (deposit != null) {
+        if(deposit != null) {
             this.deposit = deposit;
         }
         this.modifiedAt = LocalDateTime.now();
+    }
+
+    public Account update2(String accountNum, Long deposit) {
+        if(accountNum != null) {
+            this.accountNum = accountNum;
+        }
+        if(deposit != null) {
+            this.deposit = deposit;
+        }
+        this.modifiedAt = LocalDateTime.now();
+        return this;
     }
 }

@@ -1,4 +1,4 @@
-package com.metionlabs.stocksimulator.controller.dto;
+package com.metionlabs.stocksimulator.controller.dto.account;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
