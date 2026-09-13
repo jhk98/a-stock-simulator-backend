@@ -1,12 +1,13 @@
 package com.metionlabs.stocksimulator.controller.dto.orders;
 
-import jakarta.validation.constraints.NotBlank;
+import com.metionlabs.stocksimulator.domain.orders.OrderStatus;
+import com.metionlabs.stocksimulator.domain.orders.OrderType;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-// 주문 생성 요청
+// 주문 생성 시 필요한 정보
 @Getter
 @NoArgsConstructor
 public class OrdersPostCommand {
@@ -17,17 +18,17 @@ public class OrdersPostCommand {
     @NotNull(message = "accountId 는 필수입니다.")
     private Long accountId;
 
-    @NotBlank(message = "주문 종류는 필수입니다.")
-    private String orderType;
+    @NotNull(message = "주문 종류는 필수입니다.")
+    private OrderType orderType;
 
     @NotNull(message = "주문 가격은 필수입니다.")
-    @PositiveOrZero(message = "주문 가격은 0 이상이어야 합니다.")
+    @Positive
     private Long orderPrice;
 
-    @NotBlank(message = "주문 상태는 필수입니다.")
-    private String orderStatus;
+    @NotNull(message = "주문 상태는 필수입니다.")
+    private OrderStatus orderStatus;
 
     @NotNull(message = "주문 수량은 필수입니다.")
-    @PositiveOrZero(message = "주문 수량은 0 이상이어야 합니다.")
+    @Positive
     private int quantity;
 }

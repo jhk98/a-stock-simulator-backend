@@ -3,8 +3,7 @@ package com.metionlabs.stocksimulator.service;
 import com.metionlabs.stocksimulator.controller.dto.account.AccountPatchCommand;
 import com.metionlabs.stocksimulator.controller.dto.account.AccountPostCommand;
 import com.metionlabs.stocksimulator.domain.Account;
-import com.metionlabs.stocksimulator.domain.DailyPrice;
-import com.metionlabs.stocksimulator.domain.Member;
+import com.metionlabs.stocksimulator.domain.member.Member;
 import com.metionlabs.stocksimulator.repository.AccountRepository;
 import com.metionlabs.stocksimulator.repository.MemberRepository;
 import org.springframework.stereotype.Service;
@@ -57,6 +56,8 @@ public class AccountService {
      * </ul>
      * 생성자가 하나뿐이면 {@code @Autowired} 는 생략해도 스프링이 알아서 쓴다.입
      */
+
+    // 생성자 주입
     public AccountService(AccountRepository accountRepository, MemberRepository memberRepository) {
         this.accountRepository = accountRepository;
         this.memberRepository = memberRepository;
@@ -89,17 +90,19 @@ public class AccountService {
      * @throws NoSuchElementException   회원이 없을 때
      * @throws IllegalStateException    이미 계좌가 있거나 계좌번호가 중복일 때
      */
+
+    // 계좌 생성
     public Account create(AccountPostCommand command) {
         // 1) 조회 — 회원이 실재하는지 확인한다. 없는 회원의 계좌를 만들면 안 된다.
         Member member = memberRepository.findById(command.getMemberId())
                 .orElseThrow(() -> new NoSuchElementException(
-                        "회원을 찾을 수 없습니다. memberId=" + command.getMemberId()));
+                        "회원을 찾을 수 없습니다. memberId = " + command.getMemberId()));
 
         // 2) 규칙 — Account.member 가 @OneToOne 이라 회원당 계좌는 하나다.
         //    DB 제약(unique)만 믿고 넘기면 예외 메시지가 SQL 오류로 나와서
         //    호출자가 원인을 알 수 없다. 여기서 먼저 걸러 뜻이 통하는 메시지를 준다.
         if (accountRepository.existsByMemberId(member.getId())) {
-            throw new IllegalStateException("이미 계좌가 있는 회원입니다. memberId=" + member.getId());
+            throw new IllegalStateException("이미 계좌가 있는 회원입니다. memberId = " + member.getId());
         }
         if (accountRepository.existsByAccountNum(command.getAccountNum())) {
             throw new IllegalStateException("이미 사용 중인 계좌번호입니다. " + command.getAccountNum());
@@ -108,6 +111,7 @@ public class AccountService {
         // 3) 조립 — 생성 시각은 서버가 정한다. 클라이언트가 보낸 값을 쓰면
         //    시계를 조작해 과거/미래 계좌를 만들 수 있다.
         LocalDateTime now = LocalDateTime.now();
+
         Account account = Account.builder()
                 .member(member)
                 .accountNum(command.getAccountNum())
@@ -130,7 +134,7 @@ public class AccountService {
     @Transactional(readOnly = true)
     public Account getById(Long id) {
         return accountRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("계좌를 찾을 수 없습니다. id=" + id));
+                .orElseThrow(() -> new NoSuchElementException("계좌를 찾을 수 없습니다. id = " + id));
     }
 
     /** 회원 id 로 조회. 없으면 예외. */
@@ -138,7 +142,7 @@ public class AccountService {
     public Account getByMemberId(Long memberId) {
         return accountRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new NoSuchElementException(
-                        "해당 회원의 계좌가 없습니다. memberId=" + memberId));
+                        "해당 회원의 계좌가 없습니다. memberId = " + memberId));
     }
 
     // ========================================================================
@@ -156,6 +160,8 @@ public class AccountService {
      * 영속 상태라, 값을 바꾸면 커밋 시점에 JPA 가 <b>변경을 감지해 UPDATE 를 자동 발행</b>한다
      * (dirty checking). 여기서 굳이 save() 를 부르면 같은 일을 두 번 지시하는 셈이다.
      */
+
+    // 계좌 정보 수정
     public Account update(Long id, AccountPatchCommand command) {
         Account account = getById(id);
 
@@ -170,7 +176,11 @@ public class AccountService {
         // 값 변경은 엔티티가 스스로 한다. 서비스가 setter 로 필드를 하나씩 만지면
         // "수정할 때 modifiedAt 도 같이 갱신" 같은 규칙을 호출부마다 반복해야 하고,
         // 한 군데라도 빠뜨리면 조용히 어긋난다.
-        account.update(newAccountNum, command.getDeposit());
+        account.update(
+                newAccountNum,
+                command.getDeposit()
+        );
+
         return account;
     }
 
@@ -184,6 +194,8 @@ public class AccountService {
      * <p>존재 확인을 먼저 하는 이유: {@code deleteById()} 는 대상이 없어도 조용히 넘어간다.
      * 그러면 없는 계좌를 지워달라는 요청에도 200 이 나가서, 호출자는 지워졌다고 믿는다.
      */
+
+    // 계좌 정보 삭제
     public void delete(Long id) {
         Account account = getById(id);
         accountRepository.delete(account);

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-// 회원 보유 주식 수정
+// 회원 보유 주식을 수정할 수 있는 정보
 @Getter
 @NoArgsConstructor
 public class HoldingPatchCommand {

@@ -3,13 +3,15 @@ package com.metionlabs.stocksimulator.controller.dto.currentPrice;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-// 주식 현재가 부분 수정 요청
+import java.math.BigDecimal;
+
+// 주식 현재가 수정할 수 있는 정보
 @Getter
 @NoArgsConstructor
 public class CurrentPricePatchCommand {
 
     private Long currentPrice;
     private Long changePrice;
-    private double changeRate;
+    private BigDecimal changeRate;
     private Long currentVolume;
 }

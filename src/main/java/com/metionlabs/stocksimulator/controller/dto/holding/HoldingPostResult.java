@@ -2,7 +2,7 @@ package com.metionlabs.stocksimulator.controller.dto.holding;
 
 import lombok.Getter;
 
-// 회원 보유 주식 응답
+// 회원 보유 주식 생성 후 생성된 회원 보유 주식 정보 반환
 @Getter
 public class HoldingPostResult {
 

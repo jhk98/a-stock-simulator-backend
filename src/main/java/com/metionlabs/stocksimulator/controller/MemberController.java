@@ -4,7 +4,7 @@ import com.metionlabs.stocksimulator.controller.dto.member.MemberGetResult;
 import com.metionlabs.stocksimulator.controller.dto.member.MemberPatchCommand;
 import com.metionlabs.stocksimulator.controller.dto.member.MemberPostCommand;
 import com.metionlabs.stocksimulator.controller.dto.member.MemberPostResult;
-import com.metionlabs.stocksimulator.domain.Member;
+import com.metionlabs.stocksimulator.domain.member.Member;
 import com.metionlabs.stocksimulator.service.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +46,7 @@ public class MemberController {
     // U — PATCH /members/{id}
     // ========================================================================
 
-    // 회원 정보 부분 수정
+    // 회원 정보 수정
     @PatchMapping("/{id}")
     public ResponseEntity<MemberGetResult> update(@PathVariable Long id,
                                                   @RequestBody @Valid MemberPatchCommand command) {
@@ -58,6 +58,7 @@ public class MemberController {
     // D — DELETE /members/{id}
     // ========================================================================
 
+    // 회원 정보 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         memberService.delete(id);

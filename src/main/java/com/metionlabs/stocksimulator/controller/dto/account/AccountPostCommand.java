@@ -20,6 +20,8 @@ import lombok.NoArgsConstructor;
  * <p>⚠️ Jackson 이 JSON → 객체로 만들 때 기본 생성자가 필요하다. {@code @NoArgsConstructor}
  * 가 없으면 역직렬화가 실패한다.
  */
+
+// 계좌 생성 시 필요한 정보
 @Getter
 @NoArgsConstructor
 public class AccountPostCommand {

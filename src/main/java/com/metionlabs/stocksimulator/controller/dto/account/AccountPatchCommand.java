@@ -18,6 +18,8 @@ import lombok.NoArgsConstructor;
  * 게다가 이 메서드는 <b>id 없는 새 Account 를 만들어</b> 반환했는데, 그걸 저장하면
  * 수정이 아니라 새 행이 하나 더 생긴다. 수정은 "기존 엔티티의 값을 바꾸는 것"이다.
  */
+
+// 계좌를 수정할 수 있는 정보
 @Getter
 @NoArgsConstructor
 public class AccountPatchCommand {

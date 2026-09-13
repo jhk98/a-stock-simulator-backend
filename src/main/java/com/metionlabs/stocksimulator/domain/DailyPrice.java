@@ -1,11 +1,12 @@
 package com.metionlabs.stocksimulator.domain;
 
+import com.metionlabs.stocksimulator.domain.stock.Stock;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Table(name="a_stock_daily_price")
 @Entity
@@ -17,37 +18,37 @@ public class DailyPrice extends Object {
     // 주식 종목 가격 테이블 아이디
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id", nullable = false)
+    @Column(name = "id", nullable = false)
     private Long id;
 
     // 주식 아이디
     @ManyToOne
-    @JoinColumn(name="stock_id", nullable = false)
+    @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;
 
     // 시가
-    @Column(name="open_price", nullable = false)
+    @Column(name = "open_price", nullable = false)
     private Long openPrice;
 
     // 종가
-    @Column(name="close_price", nullable = false)
+    @Column(name = "close_price", nullable = false)
     private Long closePrice;
 
     // 고가
-    @Column(name="high_price", nullable = false)
+    @Column(name = "high_price", nullable = false)
     private Long highPrice;
 
     // 저가
-    @Column(name="low_price", nullable = false)
+    @Column(name = "low_price", nullable = false)
     private Long lowPrice;
 
     // 거래량
-    @Column(name="volume", nullable = false)
+    @Column(name = "volume", nullable = false)
     private Long volume;
 
     // 가격 기록 시간
-    @Column(name="report_time", nullable = false)
-    private LocalDateTime reportTime;
+    @Column(name = "price_date", nullable = false)
+    private LocalDate priceDate;
 
     // JPA가 DB 데이터를 엔티티 객체로 생성할 때 사용하는 기본 생성자
     // 외부에서 빈 객체를 직접 생성하지 못하도록 protected로 선언
@@ -75,7 +76,5 @@ public class DailyPrice extends Object {
         if(volume != null) {
             this.volume = volume;
         }
-        this.reportTime = LocalDateTime.now();
     }
-
 }

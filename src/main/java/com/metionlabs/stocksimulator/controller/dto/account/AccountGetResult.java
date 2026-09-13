@@ -33,6 +33,7 @@ public class AccountGetResult {
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
+    // 엔티티를 전달받아서 DTO객체로 변환하는 생성자
     private AccountGetResult(Account account) {
         this.id = account.getId();
         this.memberId = account.getMember() != null ? account.getMember().getId() : null;
@@ -48,6 +49,7 @@ public class AccountGetResult {
      * <p>생성자 대신 정적 팩터리를 쓰면 호출부가 {@code AccountGetResult.from(account)} 로
      * 읽혀서 "무엇으로부터 만드는지" 가 이름에 드러난다.
      */
+    // 엔티티로부터 GetResult DTO를 생성하는 메서드
     public static AccountGetResult from(Account account) {
         return new AccountGetResult(account);
     }

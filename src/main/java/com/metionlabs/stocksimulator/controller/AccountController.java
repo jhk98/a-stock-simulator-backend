@@ -67,6 +67,8 @@ public class AccountController {
      * <p>생성 성공은 201 Created 로 답하고 {@code Location} 헤더에 새 자원의 주소를 넣는 것이
      * REST 관례다. 여기서는 단순하게 200 + id 로 두되, 관례는 알아두자.
      */
+
+    // 계좌 생성
     @PostMapping
     public ResponseEntity<AccountPostResult> create(@RequestBody @Valid AccountPostCommand command) {
         Account account = accountService.create(command);
@@ -80,6 +82,8 @@ public class AccountController {
     // ========================================================================
 
     /** 계좌 단건 조회. */
+
+    // 계좌 단건 조회
     @GetMapping("/{id}")
     public ResponseEntity<AccountGetResult> get(@PathVariable Long id) {
         Account account = accountService.getById(id);
@@ -92,6 +96,8 @@ public class AccountController {
      * <p>{@code /accounts/{id}} 와 경로가 겹치지 않도록 쿼리 파라미터로 구분한다.
      * ({@code /accounts/member/1} 처럼 만들면 {@code /accounts/{id}} 와 헷갈릴 여지가 생긴다)
      */
+
+    // 회원의 계좌 조회
     @GetMapping(params = "memberId")
     public ResponseEntity<AccountGetResult> getByMember(@RequestParam Long memberId) {
         Account account = accountService.getByMemberId(memberId);
@@ -107,6 +113,8 @@ public class AccountController {
      *
      * <p>PATCH 이므로 <b>보낸 필드만</b> 바뀐다. 안 보낸 필드는 그대로다.
      */
+
+    // 계좌 정보 수정
     @PatchMapping("/{id}")
     public ResponseEntity<AccountGetResult> update(@PathVariable Long id,
                                                    @RequestBody @Valid AccountPatchCommand command) {
@@ -124,6 +132,8 @@ public class AccountController {
      * <p>삭제 성공에는 돌려줄 내용이 없으므로 204 No Content 가 맞다.
      * 지운 id 를 되돌려주는 건 의미가 없다 — 요청자가 이미 알고 있는 값이다.
      */
+
+    // 계좌 정보 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         accountService.delete(id);

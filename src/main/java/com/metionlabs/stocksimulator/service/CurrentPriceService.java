@@ -3,7 +3,7 @@ package com.metionlabs.stocksimulator.service;
 import com.metionlabs.stocksimulator.controller.dto.currentPrice.CurrentPricePatchCommand;
 import com.metionlabs.stocksimulator.controller.dto.currentPrice.CurrentPricePostCommand;
 import com.metionlabs.stocksimulator.domain.CurrentPrice;
-import com.metionlabs.stocksimulator.domain.Stock;
+import com.metionlabs.stocksimulator.domain.stock.Stock;
 import com.metionlabs.stocksimulator.repository.CurrentPriceRepository;
 import com.metionlabs.stocksimulator.repository.StockRepository;
 import org.springframework.stereotype.Service;
@@ -33,13 +33,14 @@ public class CurrentPriceService {
     public CurrentPrice create(CurrentPricePostCommand command) {
         Stock stock = stockRepository.findById(command.getStockId())
                 .orElseThrow(() -> new NoSuchElementException(
-                        "주식을 찾을 수 없습니다. stockId=" + command.getStockId()));
+                        "주식을 찾을 수 없습니다. stockId = " + command.getStockId()));
 
         if(currentPriceRepository.existsByStockId(stock.getId())) {
-            throw new IllegalStateException("이미 주식이 있습니다. stockId=" + stock.getId());
+            throw new IllegalStateException("이미 주식이 있습니다. stockId = " + stock.getId());
         }
 
         LocalDateTime now = LocalDateTime.now();
+
         CurrentPrice currentPrice = CurrentPrice.builder()
                 .stock(stock)
                 .currentPrice(command.getCurrentPrice())
@@ -75,7 +76,7 @@ public class CurrentPriceService {
     // U — 수정
     // ========================================================================
 
-    // 주식 현재가 정보 부분 수정
+    // 주식 현재가 정보 수정
     public CurrentPrice update(Long id, CurrentPricePatchCommand command) {
         CurrentPrice currentPrice = getById(id);
         currentPrice.update(command.getCurrentPrice(),
@@ -89,6 +90,7 @@ public class CurrentPriceService {
     // D — 삭제
     // ========================================================================
 
+    // 주식 현재가 삭제
     public void delete(Long id) {
         CurrentPrice currentPrice = getById(id);
         currentPriceRepository.delete(currentPrice);

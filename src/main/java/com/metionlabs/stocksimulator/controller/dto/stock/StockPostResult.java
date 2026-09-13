@@ -2,7 +2,7 @@ package com.metionlabs.stocksimulator.controller.dto.stock;
 
 import lombok.Getter;
 
-// 주식 종목 만들기 응답
+// 주식 종목 생성 후 생성된 주식 종목 정보 반환
 @Getter
 public class StockPostResult {
 

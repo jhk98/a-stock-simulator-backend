@@ -1,9 +1,10 @@
 package com.metionlabs.stocksimulator.controller.dto.stock;
 
+import com.metionlabs.stocksimulator.domain.stock.StockType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-// 주식 종목 부분 수정 요청 (PATCH)
+// 주식 종목 수정할 수 있는 정보
 @Getter
 @NoArgsConstructor
 public class StockPatchCommand {
@@ -12,5 +13,5 @@ public class StockPatchCommand {
 
     private String stockName;
 
-    private String stockType;
+    private StockType stockType;
 }

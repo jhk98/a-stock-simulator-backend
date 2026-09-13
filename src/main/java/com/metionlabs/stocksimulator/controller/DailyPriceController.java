@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/dailyPrices")
 public class DailyPriceController {
@@ -44,16 +46,19 @@ public class DailyPriceController {
 
     // 주식ID로 주식 종목 가격 조회
     @GetMapping(params = "stockId")
-    public ResponseEntity<DailyPriceGetResult> getByStock(@RequestParam Long stockId) {
-        DailyPrice dailyPrice = dailyPriceService.getByStockId(stockId);
-        return ResponseEntity.ok(DailyPriceGetResult.from(dailyPrice));
+    public ResponseEntity<List<DailyPriceGetResult>> getByStock(@RequestParam Long stockId) {
+        List<DailyPrice> dailyPrice = dailyPriceService.getByStockId(stockId);
+        List<DailyPriceGetResult> results = dailyPrice.stream()
+                .map(DailyPriceGetResult::from)
+                .toList();
+        return ResponseEntity.ok(results);
     }
 
     // ========================================================================
     // U — PATCH /dailyPrices/{id}
     // ========================================================================
 
-    // 주식 종목 가격 부분 수정
+    // 주식 종목 가격 수정
     @PatchMapping("/{id}")
     public ResponseEntity<DailyPriceGetResult> update(@PathVariable Long id,
                                                       @RequestBody @Valid DailyPricePatchCommand command) {
@@ -65,6 +70,7 @@ public class DailyPriceController {
     // D — DELETE /dailyPrices/{id}
     // ========================================================================
 
+    // 주식 종목 가격 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         dailyPriceService.delete(id);

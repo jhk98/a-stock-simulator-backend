@@ -10,14 +10,16 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/holdings")
 public class HoldingController {
 
     private final HoldingService holdingService;
 
-    public HoldingController(HoldingService holdingservice) {
-        this.holdingService = holdingservice;
+    public HoldingController(HoldingService holdingService) {
+        this.holdingService = holdingService;
     }
 
     // ========================================================================
@@ -32,7 +34,7 @@ public class HoldingController {
     }
 
     // ========================================================================
-    // R — GET /holdings/{id}, GET /holdings?stockId=, GET /holdings?accountId=
+    // R — GET /holdings/{id}, GET /holdings?accountId=
     // ========================================================================
 
     // 회원 보유 주식 단건 조회
@@ -42,24 +44,24 @@ public class HoldingController {
         return ResponseEntity.ok(HoldingGetResult.from(holding));
     }
 
-    // 주식ID로 회원 보유 주식 조회
-    @GetMapping(params = "stockId")
-    public ResponseEntity<HoldingGetResult> getByStock(@RequestParam Long stockId) {
-        Holding holding = holdingService.getByStockId(stockId);
-        return ResponseEntity.ok(HoldingGetResult.from(holding));
-    }
-
     // 계좌ID로 회원 보유 주식 조회
     @GetMapping(params = "accountId")
-    public ResponseEntity<HoldingGetResult> getByAccount(@RequestParam Long accountId) {
-        Holding holding = holdingService.getByAccountId(accountId);
-        return ResponseEntity.ok(HoldingGetResult.from(holding));
+    public ResponseEntity<List<HoldingGetResult>> getByAccount(@RequestParam Long accountId) {
+        // 전달받은 계좌ID를 Service에 전달하여 해당 계좌가 보유하고 있는 모든 정보 조회
+        List<Holding> holdings = holdingService.getByAccountId(accountId);
+
+        // 조회한 Holding 엔티티 목록을 Controller에서 사용하는 응답 DTO 목록으로 반환
+        List<HoldingGetResult> results = holdings.stream()
+                .map(HoldingGetResult::from)
+                .toList();
+        return ResponseEntity.ok(results);
     }
 
     // ========================================================================
-    // U — PATCH /accounts/{id}
+    // U — PATCH /holdings/{id}
     // ========================================================================
 
+    // 회원 보유 주식 정보 수정
     @PatchMapping("/{id}")
     public ResponseEntity<HoldingGetResult> update(@PathVariable Long id,
                                                    @RequestBody @Valid HoldingPatchCommand command) {
@@ -68,7 +70,7 @@ public class HoldingController {
     }
 
     // ========================================================================
-    // D — DELETE /accounts/{id}
+    // D — DELETE /holdings/{id}
     // ========================================================================
 
     // 회원 보유 주식 삭제

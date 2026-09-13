@@ -4,8 +4,7 @@ import com.metionlabs.stocksimulator.controller.dto.stock.StockGetResult;
 import com.metionlabs.stocksimulator.controller.dto.stock.StockPatchCommand;
 import com.metionlabs.stocksimulator.controller.dto.stock.StockPostCommand;
 import com.metionlabs.stocksimulator.controller.dto.stock.StockPostResult;
-import com.metionlabs.stocksimulator.domain.Stock;
-import com.metionlabs.stocksimulator.repository.StockRepository;
+import com.metionlabs.stocksimulator.domain.stock.Stock;
 import com.metionlabs.stocksimulator.service.StockService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -16,18 +15,16 @@ import org.springframework.web.bind.annotation.*;
 public class StockController {
 
     private final StockService stockService;
-    private final StockRepository stockRepository;
 
-    public StockController(StockService stockService, StockRepository stockRepository) {
+    public StockController(StockService stockService) {
         this.stockService = stockService;
-        this.stockRepository = stockRepository;
     }
 
     // ========================================================================
     // C — POST /stocks
     // ========================================================================
 
-    // 주식 종목 만들기
+    // 주식 종목 생성
     @PostMapping
     public ResponseEntity<StockPostResult> create(@RequestBody @Valid StockPostCommand command) {
         Stock stock = stockService.create(command);
@@ -35,7 +32,7 @@ public class StockController {
     }
 
     // ========================================================================
-    // R — GET /accounts/{id}, GET /accounts?memberId=
+    // R — GET /stocks/{id}
     // ========================================================================
 
     // 주식 종목 단건 조회
@@ -49,6 +46,7 @@ public class StockController {
     // U — PATCH /stocks/{id}
     // ========================================================================
 
+    // 주식 종목 정보 수정
     @PatchMapping("/{id}")
     public ResponseEntity<StockGetResult> update(@PathVariable Long id,
                                                  @RequestBody @Valid StockPatchCommand command) {
@@ -60,6 +58,7 @@ public class StockController {
     // D — DELETE /stocks/{id}
     // ========================================================================
 
+    // 주식 종목 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         stockService.delete(id);

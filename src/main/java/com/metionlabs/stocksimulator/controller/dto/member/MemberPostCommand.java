@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// 회원가입 시 필요한 정보
 @Getter
 @NoArgsConstructor
 public class MemberPostCommand {

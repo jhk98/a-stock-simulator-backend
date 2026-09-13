@@ -1,5 +1,6 @@
 package com.metionlabs.stocksimulator.domain;
 
+import com.metionlabs.stocksimulator.domain.stock.Stock;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,33 +20,33 @@ public class Holding {
     // 보유 주식 테이블 아이디
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
+    @Column(name = "id")
     private Long id;
 
     // 주식 아이디
     @ManyToOne
-    @JoinColumn(name="stock_id")
+    @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;
 
     // 계좌 아이디
     @ManyToOne
-    @JoinColumn(name="account_id")
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
     // 보유 수량
-    @Column(name="quantity")
+    @Column(name = "quantity", nullable = false)
     private int quantity;
 
     // 평균 금액
-    @Column(name="avg_price")
+    @Column(name = "avg_price", nullable = false)
     private Long avgPrice;
 
     // 생성일
-    @Column(name="created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     // 수정일
-    @Column(name="modified_at")
+    @Column(name = "modified_at", nullable = false)
     private LocalDateTime modifiedAt;
 
     // JPA가 DB 데이터를 엔티티 객체로 생성할 때 사용하는 기본 생성자

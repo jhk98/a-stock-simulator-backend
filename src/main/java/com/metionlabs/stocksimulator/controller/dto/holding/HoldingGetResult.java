@@ -5,7 +5,7 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-// 회원 보유 주식 조회 응답
+// 회원 보유 주식 조회 시 반환할 정보
 @Getter
 public class HoldingGetResult {
 
@@ -17,6 +17,7 @@ public class HoldingGetResult {
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
+    // 엔티티를 전달받아서 DTO객체로 변환하는 생성자
     private HoldingGetResult(Holding holding) {
         this.id = holding.getId();
         this.stockId = holding.getStock() != null ? holding.getStock().getId() : null;
@@ -27,6 +28,7 @@ public class HoldingGetResult {
         this.modifiedAt = holding.getModifiedAt();
     }
 
+    // 엔티티로부터 GetResult DTO를 생성하는 메서드
     public static HoldingGetResult from(Holding holding) {
         return new HoldingGetResult(holding);
     }

@@ -64,6 +64,7 @@ public class CurrentPriceController {
     // D — DELETE /currentPrices/{id}
     // ========================================================================
 
+    // 주식 현재가 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         currentPriceService.delete(id);

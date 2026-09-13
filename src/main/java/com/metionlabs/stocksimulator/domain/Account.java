@@ -1,5 +1,6 @@
 package com.metionlabs.stocksimulator.domain;
 
+import com.metionlabs.stocksimulator.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,28 +18,28 @@ public class Account {
     // 계좌 테이블 아이디
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
+    @Column(name = "id")
     private Long id;
 
     // 멤버 아이디
-    @OneToOne
-    @JoinColumn(name="member_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false, unique = true)
     private Member member;
 
     // 계좌번호
-    @Column(name="account_num")
+    @Column(name = "account_num", nullable = false, unique = true)
     private String accountNum;
 
     // 예수금
-    @Column(name="deposit")
+    @Column(name = "deposit", nullable = false)
     private Long deposit;
 
     // 생성일
-    @Column(name="created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     // 수정일
-    @Column(name="modified_at")
+    @Column(name = "modified_at", nullable = false)
     private LocalDateTime modifiedAt;
 
     // JPA가 DB 데이터를 엔티티 객체로 생성할 때 사용하는 기본 생성자
@@ -69,16 +70,5 @@ public class Account {
             this.deposit = deposit;
         }
         this.modifiedAt = LocalDateTime.now();
-    }
-
-    public Account update2(String accountNum, Long deposit) {
-        if(accountNum != null) {
-            this.accountNum = accountNum;
-        }
-        if(deposit != null) {
-            this.deposit = deposit;
-        }
-        this.modifiedAt = LocalDateTime.now();
-        return this;
     }
 }

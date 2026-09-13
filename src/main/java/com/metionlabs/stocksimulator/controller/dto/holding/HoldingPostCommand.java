@@ -5,7 +5,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-// 회원 보유 주식 생성
+// 회원 보유 주식 생성 시 필요한 정보
 @Getter
 @NoArgsConstructor
 public class HoldingPostCommand {

@@ -1,10 +1,12 @@
 package com.metionlabs.stocksimulator.domain;
 
+import com.metionlabs.stocksimulator.domain.stock.Stock;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Table(name="a_stock_current_price")
@@ -35,7 +37,7 @@ public class CurrentPrice {
 
     // 변동 비율
     @Column(name="change_rate", nullable = false)
-    private double changeRate;
+    private BigDecimal changeRate;
 
     // 현재 거래량
     @Column(name="current_volume", nullable = false)
@@ -53,7 +55,7 @@ public class CurrentPrice {
     // 주식 현재가 수정 메서드
     public void update(Long currentPrice,
                        Long changePrice,
-                       Double changeRate,
+                       BigDecimal changeRate,
                        Long currentVolume) {
         if(currentPrice != null) {
             this.currentPrice = currentPrice;
