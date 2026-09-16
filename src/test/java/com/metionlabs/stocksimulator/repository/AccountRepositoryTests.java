@@ -2,6 +2,8 @@ package com.metionlabs.stocksimulator.repository;
 
 import com.metionlabs.stocksimulator.domain.Account;
 import com.metionlabs.stocksimulator.domain.member.Member;
+import com.metionlabs.stocksimulator.domain.member.MemberRole;
+import com.metionlabs.stocksimulator.domain.member.MemberStatus;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,6 +46,9 @@ public class AccountRepositoryTests {
                 .phoneNumber("010-1234-1234")
                 .rgstNumber("980101-1011111")
                 .passwd("test1234")
+                .status(MemberStatus.ACTIVE)
+                .role(MemberRole.USER)
+                .lastAccessTime(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build();
@@ -55,6 +60,9 @@ public class AccountRepositoryTests {
                 .phoneNumber("010-2345-2345")
                 .rgstNumber("980202-1022222")
                 .passwd("test2345")
+                .status(MemberStatus.ACTIVE)
+                .role(MemberRole.USER)
+                .lastAccessTime(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build();
@@ -66,6 +74,9 @@ public class AccountRepositoryTests {
                 .phoneNumber("010-3456-3456")
                 .rgstNumber("980303-1033333")
                 .passwd("test3456")
+                .status(MemberStatus.ACTIVE)
+                .role(MemberRole.USER)
+                .lastAccessTime(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build();
@@ -152,6 +163,9 @@ public class AccountRepositoryTests {
                 .phoneNumber("010-4567-4567")
                 .rgstNumber("980404-1044444")
                 .passwd("test4567")
+                .status(MemberStatus.ACTIVE)
+                .role(MemberRole.USER)
+                .lastAccessTime(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build();

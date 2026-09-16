@@ -1,5 +1,7 @@
 package com.metionlabs.stocksimulator.util;
 
+import com.metionlabs.stocksimulator.domain.member.MemberRole;
+import com.metionlabs.stocksimulator.domain.member.MemberStatus;
 import com.metionlabs.stocksimulator.domain.orders.OrderStatus;
 import com.metionlabs.stocksimulator.domain.orders.OrderType;
 import com.metionlabs.stocksimulator.domain.stock.StockType;
@@ -108,6 +110,18 @@ public class TestRandomGenerator {
 
         // 랜덤 문자열 + 랜덤 정수 반환
         return randomstr + String.format("%03d", randomNum);
+    }
+
+    // 회원 상태 랜덤 생성
+    public static MemberStatus randomStatus() {
+        // Math.random() 값이 0이상 0.5미만인 경우는 ACTIVE, 0.5이상 1미만인 경우는 INACTIVE
+        return Math.random() < 0.5 ? MemberStatus.ACTIVE : MemberStatus.INACTIVE;
+    }
+
+    // 회원 역할 랜덤 생성
+    public static MemberRole randomRole() {
+        // Math.random() 값이 0이상 0.5미만인 경우는 USER, 0.5이상 1미만인 경우는 ADMIN
+        return Math.random() < 0.5 ? MemberRole.USER : MemberRole.ADMIN;
     }
 
     // -------------------------------------------------------------------------

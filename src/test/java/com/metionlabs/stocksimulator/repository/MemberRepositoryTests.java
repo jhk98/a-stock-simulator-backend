@@ -1,6 +1,8 @@
 package com.metionlabs.stocksimulator.repository;
 
 import com.metionlabs.stocksimulator.domain.member.Member;
+import com.metionlabs.stocksimulator.domain.member.MemberRole;
+import com.metionlabs.stocksimulator.domain.member.MemberStatus;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +42,9 @@ public class MemberRepositoryTests {
                 .phoneNumber(randomPhoneNumber())
                 .rgstNumber(randomRgstNumber())
                 .passwd(randomPasswd())
+                .status(randomStatus())
+                .role(randomRole())
+                .lastAccessTime(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build();
@@ -52,6 +57,9 @@ public class MemberRepositoryTests {
                 .phoneNumber(randomPhoneNumber())
                 .rgstNumber(randomRgstNumber())
                 .passwd(randomPasswd())
+                .status(randomStatus())
+                .role(randomRole())
+                .lastAccessTime(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build();
@@ -64,6 +72,9 @@ public class MemberRepositoryTests {
                 .phoneNumber(randomPhoneNumber())
                 .rgstNumber(randomRgstNumber())
                 .passwd(randomPasswd())
+                .status(randomStatus())
+                .role(randomRole())
+                .lastAccessTime(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build();
@@ -111,6 +122,8 @@ public class MemberRepositoryTests {
         String phoneNumber = randomPhoneNumber();
         String rgstNumber = randomRgstNumber();
         String passwd = randomPasswd();
+        MemberStatus status = randomStatus();
+        MemberRole role = randomRole();
 
         // 시간
         LocalDateTime createdAt = LocalDateTime.now();
@@ -124,6 +137,9 @@ public class MemberRepositoryTests {
                 .phoneNumber(phoneNumber)
                 .rgstNumber(rgstNumber)
                 .passwd(passwd)
+                .status(randomStatus())
+                .role(randomRole())
+                .lastAccessTime(LocalDateTime.now())
                 .createdAt(createdAt)
                 .modifiedAt(modifiedAt)
                 .build();
@@ -166,15 +182,19 @@ public class MemberRepositoryTests {
         LocalDateTime berforeModifiedAt = member.getModifiedAt();
 
         // 랜덤하게 설정된 수정할 회원 정보 객체 생성
-//        String loginId = randomLoginId();
         String name = randomName();
         String email = randomEmail();
         String phoneNumber = randomPhoneNumber();
-//        String rgstNumber = randomRgstNumber();
         String passwd = randomPasswd();
 
         // 회원 정보 수정
         member.update(name, email, phoneNumber, passwd);
+
+        // 수정 후 수정일 저장
+        LocalDateTime afterModifiedAt = member.getModifiedAt();
+
+        // 수정일이 기존 수정일 보다 이후인지 확인
+        assertTrue(afterModifiedAt.isAfter(berforeModifiedAt));
 
         // 새로운 데이터 삽입
         Member save = memberRepository.save(member);
@@ -183,16 +203,16 @@ public class MemberRepositoryTests {
         assertNotNull(save);
 
         // 저장된 데이터가 저장하기 전 데이터와 같은지 확인
-//        assertEquals(loginId, save.getLoginId());
-//        assertEquals(name, save.getName());
+        assertEquals(name, save.getName());
         assertEquals(email, save.getEmail());
         assertEquals(phoneNumber, save.getPhoneNumber());
-//        assertEquals(rgstNumber, save.getRgstNumber());
         assertEquals(passwd, save.getPasswd());
         assertEquals(createdAt, save.getCreatedAt());
 
-        // 수정일이 갱신 되었는지 확인
+        // 수정일이 null이 아닌지 확인
         assertNotNull(save.getModifiedAt());
+
+        // 저장 후 수정일이 수정 전보다 이후인지 확인
         assertTrue(save.getModifiedAt().isAfter(berforeModifiedAt));
     }
 

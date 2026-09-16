@@ -200,8 +200,8 @@ public class DailyPriceRepositoryTests {
         // 기존 주식 정보 저장
         Stock stock = newDailyPrice.getStock();
 
-        // 기존 수정 시간 저장
-        LocalDate beforeUpdatedAt = newDailyPrice.getPriceDate();
+        // 기존 가격 기록 시간 저장
+        LocalDate priceDate = newDailyPrice.getPriceDate();
 
         // 랜덤하게 설정된 수정할 주식 종목 가격 객체 생성
         long openPrice = randomOpenPrice();
@@ -233,9 +233,8 @@ public class DailyPriceRepositoryTests {
         assertEquals(lowPrice, save.getLowPrice());
         assertEquals(volume, save.getVolume());
 
-        // 수정된 시간이 갱신되었는지 확인
-        assertNotNull(save.getPriceDate());
-        assertTrue(save.getPriceDate().isAfter(beforeUpdatedAt));
+        // 가격 기록 날짜가 변경되지 않았는지 확인
+        assertEquals(priceDate, save.getPriceDate());
     }
 
     @Order(4)
