@@ -20,6 +20,8 @@ public class MemberController {
         this.memberService = memberService;
     }
 
+    // jenkins test
+
     // ========================================================================
     // C — POST /members
     // ========================================================================
