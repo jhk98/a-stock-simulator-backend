@@ -15,7 +15,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
-group = "com.metionlabs"
+group = "com.myproject"
 version = "0.0.1-SNAPSHOT"
 description = "주식 시뮬레이터"
 

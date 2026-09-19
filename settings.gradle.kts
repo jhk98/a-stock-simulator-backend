@@ -8,4 +8,4 @@
 // 이 파일이 있는 위치를 프로젝트 루트로 인식한다.
 // ############################################################################
 
-rootProject.name = "a-stock-simulator"
+rootProject.name = "a-stock-simulator-backend"
