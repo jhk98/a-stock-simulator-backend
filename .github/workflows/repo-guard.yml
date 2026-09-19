@@ -1,0 +1,12 @@
+# repo-guard — 비밀값 SOT(spec/secrets-sot.md) + opscore 규약. 훅을 우회한 push 도 여기서 잡힌다.
+#   본체 = metionlabs-opscore/.github/workflows/repo-guard.yml (재사용). 배포 워크플로는 이 검사를 선행 조건으로 건다.
+name: repo-guard
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+jobs:
+  guard:
+    uses: metionlabs/metionlabs-opscore/.github/workflows/repo-guard.yml@main
+    secrets: inherit
