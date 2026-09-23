@@ -11,6 +11,7 @@ pipeline {
                     sh '''
                         docker run --rm \
                         -e DB_PASSWORD="$DB_PASSWORD" \
+                        -e TZ=Asia/Seoul \
                         -v /home/ubuntu/jenkins_home/workspace/a-stock-simulator-backend:/workspace \
                         -w /workspace \
                         eclipse-temurin:25-jdk \
