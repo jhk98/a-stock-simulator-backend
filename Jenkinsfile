@@ -6,7 +6,7 @@ pipeline {
             steps {
                 sh '''
                     docker run --rm \
-                    -v "$PWD:/workspace" \
+                    -v /home/ubuntu/jenkins_home/workspace/a-stock-simulator-backend:/workspace \
                     -w /workspace \
                     eclipse-temurin:25-jdk \
                     ./gradlew clean build
