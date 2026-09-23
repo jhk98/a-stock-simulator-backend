@@ -1,5 +1,5 @@
 pipeline {
-    agent key
+    agent any
 
     stages {
         stage('Build & Test') {
