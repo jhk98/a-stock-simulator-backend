@@ -66,7 +66,7 @@ pipeline {
             }
         }
 
-        stage('Test EC2 SSM') {
+        stage('Deploy to EC2') {
             steps {
                 withCredentials([
                     string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
@@ -76,7 +76,13 @@ pipeline {
                         aws ssm send-command \
                             --instance-ids "i-037c1a8ae96b5d24c" \
                             --document-name "AWS-RunShellScript" \
-                            --parameters 'commands=["echo Jenkins SSM connection success"]' \
+                            --parameters 'commands=[
+                                "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 784917519469.dkr.ecr.ap-northeast-2.amazonaws.com",
+                                "docker pull 784917519469.dkr.ecr.ap-northeast-2.amazonaws.com/a-stock-simulator:latest",
+                                "docker stop a-stock-simulator || true",
+                                "docker rm a-stock-simulator || true",
+                                "docker run -d --name a-stock-simulator --restart unless-stopped --network host --env-file /home/ubuntu/.config/a-stock-simulator/app.env 784917519469.dkr.ecr.ap-northeast-2.amazonaws.com/a-stock-simulator:latest"
+                            ]' \
                             --region ap-northeast-2
                     '''
                 }
