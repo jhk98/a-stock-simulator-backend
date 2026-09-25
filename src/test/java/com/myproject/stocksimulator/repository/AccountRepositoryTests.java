@@ -20,7 +20,7 @@ import static com.myproject.stocksimulator.util.TestRandomGenerator.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 public class AccountRepositoryTests {
-    // 젠킨스 테스트
+
     @Autowired
     AccountRepository accountRepository;
 
