@@ -73,7 +73,7 @@ pipeline {
                     string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
                 ]) {
                     sh '''
-                        Command_ID=$(aws ssm send-command \
+                        COMMAND_ID=$(aws ssm send-command \
                             --instance-ids "i-037c1a8ae96b5d24c" \
                             --document-name "AWS-RunShellScript" \
                             --parameters 'commands=[
@@ -86,6 +86,18 @@ pipeline {
                             --region ap-northeast-2 \
                             --query 'Command.CommandId' \
                             --output text)
+
+                        echo "SSM Command ID: $COMMAND_ID"
+
+                        aws ssm wait command-executed \
+                            --command-id "$COMMAND_ID" \
+                            --instance-id "i-037c1a8ae96b5d24c" \
+                            --region ap-northeast-2
+
+                        aws ssm get-command-invocation \
+                            --command-id "$COMMAND_ID" \
+                            --instance-id "i-037c1a8ae96b5d24c" \
+                            --region ap-northeast-2
                     '''
                 }
             }
