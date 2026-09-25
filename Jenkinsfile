@@ -74,7 +74,7 @@ pipeline {
                 ]) {
                     sh '''
                         aws ssm send-command \
-                            --instance-ids "i-037cla8ae96b5d24c" \
+                            --instance-ids "i-037c1a8ae96b5d24c" \
                             --document-name "AWS-RunShellScript" \
                             --parameters 'commands=["echo Jenkins SSM connection success"]' \
                             --region ap-northeast-2
