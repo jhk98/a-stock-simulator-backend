@@ -73,7 +73,7 @@ pipeline {
                     string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
                 ]) {
                     sh '''
-                        aws ssm send-command \
+                        Command_ID=$(aws ssm send-command \
                             --instance-ids "i-037c1a8ae96b5d24c" \
                             --document-name "AWS-RunShellScript" \
                             --parameters 'commands=[
@@ -83,7 +83,9 @@ pipeline {
                                 "docker rm a-stock-simulator || true",
                                 "docker run -d --name a-stock-simulator --restart unless-stopped --network host --env-file /home/ubuntu/.config/a-stock-simulator/app.env 784917519469.dkr.ecr.ap-northeast-2.amazonaws.com/a-stock-simulator:latest"
                             ]' \
-                            --region ap-northeast-2
+                            --region ap-northeast-2 \
+                            --query 'Command.CommandId' \
+                            --output text)
                     '''
                 }
             }
