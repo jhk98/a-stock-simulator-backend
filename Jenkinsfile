@@ -20,5 +20,15 @@ pipeline {
                 }
             }
         }
+
+        stage('Docker Build') {
+            steps {
+                sh '''
+                    docker build \
+                        -t a-stock-simulator:latest \
+                        /home/ubuntu/jenkins_home/workspace/a-stock-simulator-backend
+                '''
+            }
+        }
     }
 }
