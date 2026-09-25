@@ -65,5 +65,22 @@ pipeline {
                 '''
             }
         }
+
+        stage('Test EC2 SSM') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                        aws ssm send-command \
+                            --instance-ids "i-037cla8ae96b5d24c" \
+                            --document-name "AWS-RunShellScript" \
+                            --parameters 'commands=["echo Jenkins SSM connection success"]' \
+                            --region ap-northeast-2
+                    '''
+                }
+            }
+        }
     }
 }
