@@ -41,9 +41,28 @@ pipeline {
                         aws ecr get-login-password --region ap-northeast-2 \
                         | docker login \
                             --username AWS \
-                            --password-stdin 784917519469.drk.ecr.ap-northeast-2.amazonaws.com
+                            --password-stdin 784917519469.dkr.ecr.ap-northeast-2.amazonaws.com
                     '''
                 }
+            }
+        }
+
+        stage('Docker Tag') {
+            steps {
+                sh '''
+                    docker tag \
+                        a-stock-simulator:latest \
+                        784917519469.dkr.ecr.ap-northeast-2.amazonaws.com/a-stock-simulator:latest
+                '''
+            }
+        }
+
+        stage('ECR Push') {
+            steps {
+                sh '''
+                    docker push \
+                        784917519469.dkr.ecr.ap-northeast-2.amazonaws.com/a-stock-simulator:latest
+                '''
             }
         }
     }
