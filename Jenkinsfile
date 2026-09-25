@@ -30,5 +30,21 @@ pipeline {
                 '''
             }
         }
+
+        stage('ECR Login') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                        aws ecr get-login-password --region ap-northeast-2 \
+                        | docker login \
+                            --username AWS \
+                            --password-stdin 784917519469.drk.ecr.ap-northeast-2.amazonaws.com
+                    '''
+                }
+            }
+        }
     }
 }
