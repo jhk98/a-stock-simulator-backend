@@ -59,6 +59,9 @@ dependencies {
 	// ------------------------------------------------------------------------
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 
+	// redis
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
 	// ------------------------------------------------------------------------
 	// DB — 일단 H2(인메모리)로 시작한다
 	// ------------------------------------------------------------------------
