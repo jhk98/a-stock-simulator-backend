@@ -16,7 +16,7 @@ class RedisConnectionTests {
     @Test
     void redisConnectionTest() {
 
-        // 저장
+        // 저장가
         redisTemplate.opsForValue().set("test", "hello redis");
 
         // 조회
