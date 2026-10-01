@@ -6,6 +6,7 @@ import com.myproject.stocksimulator.domain.member.Member;
 import com.myproject.stocksimulator.domain.member.MemberRole;
 import com.myproject.stocksimulator.domain.member.MemberStatus;
 import com.myproject.stocksimulator.repository.MemberRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +18,12 @@ import java.util.NoSuchElementException;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 생성자 주입
-    public MemberService(MemberRepository memberRepository) {
+    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder) {
         this.memberRepository = memberRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // ========================================================================
@@ -58,9 +61,10 @@ public class MemberService {
                 .email(command.getEmail())
                 .phoneNumber(command.getPhoneNumber())
                 .rgstNumber(command.getRgstNumber())
-                .passwd(command.getPasswd())
+                .passwd(passwordEncoder.encode(command.getPasswd()))
                 .status(MemberStatus.ACTIVE)
                 .role(MemberRole.USER)
+                .lastAccessTime(null)
                 .createdAt(now)
                 .modifiedAt(now)
                 .build();
@@ -102,11 +106,17 @@ public class MemberService {
             throw new IllegalStateException("이미 사용 중인 전화번호입니다. " + newPhoneNumber);
         }
 
+        String encodedPasswd = null;
+
+        if(command.getPasswd() != null) {
+            encodedPasswd = passwordEncoder.encode(command.getPasswd());
+        }
+
         member.update(
                 command.getName(),
                 command.getEmail(),
                 command.getPhoneNumber(),
-                command.getPasswd()
+                encodedPasswd
         );
 
         return member;

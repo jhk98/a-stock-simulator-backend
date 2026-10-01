@@ -62,6 +62,9 @@ dependencies {
 	// redis
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
+	// 비밀번호 암호화 (BCrypt)
+	implementation("org.springframework.security:spring-security-crypto")
+
 	// ------------------------------------------------------------------------
 	// DB — 일단 H2(인메모리)로 시작한다
 	// ------------------------------------------------------------------------

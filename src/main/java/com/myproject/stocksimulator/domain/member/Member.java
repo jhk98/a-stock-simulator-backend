@@ -55,7 +55,7 @@ public class Member {
     private MemberRole role;
 
     // 마지막 접속 시간
-    @Column(name = "last_access_time", nullable = false)
+    @Column(name = "last_access_time")
     private LocalDateTime lastAccessTime;
 
     // 생성일
@@ -86,5 +86,9 @@ public class Member {
             this.passwd = passwd;
         }
         this.modifiedAt = LocalDateTime.now();
+    }
+
+    public void updateLastAccessTime() {
+        this.lastAccessTime = LocalDateTime.now();
     }
 }
