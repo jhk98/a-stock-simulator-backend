@@ -1,8 +1,6 @@
 package com.myproject.stocksimulator.controller.dto.account;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,12 +26,4 @@ public class AccountPostCommand {
 
     @NotNull(message = "memberId 는 필수입니다.")
     private Long memberId;
-
-    @NotBlank(message = "계좌번호는 필수입니다.")
-    private String accountNum;
-
-    /** 예수금. 개설 시 0원도 허용하되 음수는 막는다. */
-    @NotNull(message = "예수금은 필수입니다.")
-    @PositiveOrZero(message = "예수금은 0 이상이어야 합니다.")
-    private Long deposit;
 }

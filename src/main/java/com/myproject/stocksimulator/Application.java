@@ -2,6 +2,7 @@ package com.myproject.stocksimulator;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * 애플리케이션 진입점.
@@ -19,14 +20,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 하위 패키지로 옮기면 형제 패키지의 빈을 못 찾아서
  * "분명 @Service 붙였는데 주입이 안 된다" 는 상황이 생긴다.
  */
+@EnableScheduling
 @SpringBootApplication
 public class Application {
-
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
-
-//        new Member();
-//        new CustomAccountRepository();
-//        new AccountRepository();
     }
 }

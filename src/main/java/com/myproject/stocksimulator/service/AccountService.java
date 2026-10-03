@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 계좌 서비스 — <b>규칙과 트랜잭션이 사는 곳</b>.
@@ -92,38 +93,95 @@ public class AccountService {
      */
 
     // 계좌 생성
+//    public Account create(AccountPostCommand command) {
+//        // 1) 조회 — 회원이 실재하는지 확인한다. 없는 회원의 계좌를 만들면 안 된다.
+//        Member member = memberRepository.findById(command.getMemberId())
+//                .orElseThrow(() -> new NoSuchElementException(
+//                        "회원을 찾을 수 없습니다. memberId = " + command.getMemberId()));
+//
+//        // 2) 규칙 — Account.member 가 @OneToOne 이라 회원당 계좌는 하나다.
+//        //    DB 제약(unique)만 믿고 넘기면 예외 메시지가 SQL 오류로 나와서
+//        //    호출자가 원인을 알 수 없다. 여기서 먼저 걸러 뜻이 통하는 메시지를 준다.
+//        if (accountRepository.existsByMemberId(member.getId())) {
+//            throw new IllegalStateException("이미 계좌가 있는 회원입니다. memberId = " + member.getId());
+//        }
+//        if (accountRepository.existsByAccountNum(command.getAccountNum())) {
+//            throw new IllegalStateException("이미 사용 중인 계좌번호입니다. " + command.getAccountNum());
+//        }
+//
+//        // 3) 조립 — 생성 시각은 서버가 정한다. 클라이언트가 보낸 값을 쓰면
+//        //    시계를 조작해 과거/미래 계좌를 만들 수 있다.
+//        LocalDateTime now = LocalDateTime.now();
+//
+//        Account account = Account.builder()
+//                .member(member)
+//                .accountNum(command.getAccountNum())
+//                .deposit(command.getDeposit())
+//                .createdAt(now)
+//                .modifiedAt(now)
+//                .build();
+//
+//        // 4) 저장 — id 가 null 인 엔티티라 save() 는 INSERT 로 동작한다.
+//        //    save() 가 돌려주는 객체를 써야 한다. 인자로 넘긴 account 에는
+//        //    생성된 id 가 안 채워질 수 있다(구현·전략에 따라 다르다).
+//        return accountRepository.save(account);
+//    }
+
+    // 계좌 생성
     public Account create(AccountPostCommand command) {
-        // 1) 조회 — 회원이 실재하는지 확인한다. 없는 회원의 계좌를 만들면 안 된다.
+
+        // 1) 회원 존재 여부 확인
         Member member = memberRepository.findById(command.getMemberId())
                 .orElseThrow(() -> new NoSuchElementException(
                         "회원을 찾을 수 없습니다. memberId = " + command.getMemberId()));
 
-        // 2) 규칙 — Account.member 가 @OneToOne 이라 회원당 계좌는 하나다.
-        //    DB 제약(unique)만 믿고 넘기면 예외 메시지가 SQL 오류로 나와서
-        //    호출자가 원인을 알 수 없다. 여기서 먼저 걸러 뜻이 통하는 메시지를 준다.
+        // 2) 1인 1계좌 확인
         if (accountRepository.existsByMemberId(member.getId())) {
-            throw new IllegalStateException("이미 계좌가 있는 회원입니다. memberId = " + member.getId());
-        }
-        if (accountRepository.existsByAccountNum(command.getAccountNum())) {
-            throw new IllegalStateException("이미 사용 중인 계좌번호입니다. " + command.getAccountNum());
+            throw new IllegalStateException(
+                    "이미 계좌가 있는 회원입니다. memberId = " + member.getId());
         }
 
-        // 3) 조립 — 생성 시각은 서버가 정한다. 클라이언트가 보낸 값을 쓰면
-        //    시계를 조작해 과거/미래 계좌를 만들 수 있다.
+        // 3) 사이트에서 사용할 증권계좌번호 자동 생성
+        String accountNum = generateAccountNum();
+
+        // 4) 생성 시각
         LocalDateTime now = LocalDateTime.now();
 
+        // 5) 계좌 생성
+        // 신규 계좌의 예수금은 항상 0원으로 시작한다.
         Account account = Account.builder()
                 .member(member)
-                .accountNum(command.getAccountNum())
-                .deposit(command.getDeposit())
+                .accountNum(accountNum)
+                .deposit(0L)
                 .createdAt(now)
                 .modifiedAt(now)
                 .build();
 
-        // 4) 저장 — id 가 null 인 엔티티라 save() 는 INSERT 로 동작한다.
-        //    save() 가 돌려주는 객체를 써야 한다. 인자로 넘긴 account 에는
-        //    생성된 id 가 안 채워질 수 있다(구현·전략에 따라 다르다).
+        // 6) 저장
         return accountRepository.save(account);
+    }
+
+    // 계좌번호 자동 생성
+    private String generateAccountNum() {
+
+        String accountNum;
+
+        do {
+            int middle = ThreadLocalRandom.current()
+                    .nextInt(10, 100);
+
+            int last = ThreadLocalRandom.current()
+                    .nextInt(100000, 1000000);
+
+            accountNum = String.format(
+                    "110-%02d-%06d",
+                    middle,
+                    last
+            );
+
+        } while (accountRepository.existsByAccountNum(accountNum));
+
+        return accountNum;
     }
 
     // ========================================================================
@@ -137,7 +195,7 @@ public class AccountService {
                 .orElseThrow(() -> new NoSuchElementException("계좌를 찾을 수 없습니다. id = " + id));
     }
 
-    /** 회원 id 로 조회. 없으면 예외. */
+    /* 회원 id 로 조회. 없으면 예외. */
     @Transactional(readOnly = true)
     public Account getByMemberId(Long memberId) {
         return accountRepository.findByMemberId(memberId)
