@@ -1,14 +1,16 @@
 package com.myproject.stocksimulator.security.jwt;
 
+import com.myproject.stocksimulator.domain.member.Member;
+import com.myproject.stocksimulator.domain.member.MemberStatus;
+import com.myproject.stocksimulator.repository.MemberRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -17,42 +19,20 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * JWT 기반 사용자 인증 필터.
+ * HTTP 요청에 포함된 JWT Access Token을 검증하는 필터
  *
- * <p>HTTP 요청의 Authorization 헤더에서 JWT를 추출하고,
- * 유효한 토큰이면 Spring Security에 인증 정보를 등록한다.</p>
- *
- * <p>OncePerRequestFilter를 상속하여
- * 하나의 요청에서 필터가 중복 실행되는 것을 방지한다.</p>
+ * 유효한 토큰이라도 회원이 탈퇴했거나 삭제되었다면
+ * 인증 정보를 등록하지 않는다.
  */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    /**
-     * Authorization 헤더 이름.
-     */
-    private static final String AUTHORIZATION_HEADER = "Authorization";
-
-    /**
-     * JWT 인증 방식 접두어.
-     *
-     * <p>Authorization: Bearer {JWT}</p>
-     */
     private static final String BEARER_PREFIX = "Bearer ";
 
-    /**
-     * JWT 생성 및 검증 객체.
-     */
     private final JwtTokenProvider jwtTokenProvider;
+    private final MemberRepository memberRepository;
 
-    /**
-     * HTTP 요청에서 JWT를 검증하고 인증 정보를 등록한다.
-     *
-     * @param request HTTP 요청
-     * @param response HTTP 응답
-     * @param filterChain 다음 필터 실행을 위한 객체
-     */
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -60,60 +40,68 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        try {
+        String token = resolveToken(request);
 
-            // 1. Authorization 헤더에서 JWT 추출
-            String token = resolveToken(request);
+        // 유효한 Access Token인 경우에만 인증 처리
+        if (token != null
+                && SecurityContextHolder.getContext().getAuthentication() == null
+                && jwtTokenProvider.validateAccessToken(token)) {
 
-            // 2. 토큰이 존재하고 유효한 Access Token인지 검증
-            if (token != null && jwtTokenProvider.validateToken(token)) {
+            Long memberId = jwtTokenProvider.getMemberId(token);
 
-                // 3. JWT에서 회원 ID 추출
-                Long memberId = jwtTokenProvider.getMemberId(token);
+            // 실제 DB에서 활성 회원 확인
+            Member member = memberRepository
+                    .findByIdAndStatus(
+                            memberId,
+                            MemberStatus.ACTIVE
+                    )
+                    .orElse(null);
 
-                // 4. 인증 객체 생성
-                // 현재 단계에서는 회원 ID를 인증 주체로 사용한다.
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                memberId,
-                                null,
-                                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+            if (member != null && member.getRole() != null) {
+
+                // DB에 저장된 실제 권한 사용
+                SimpleGrantedAuthority authority =
+                        new SimpleGrantedAuthority(
+                                "ROLE_" + member.getRole().name()
                         );
 
-                // 5. Spring Security에 인증 정보 등록
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                member.getId(),
+                                null,
+                                List.of(authority)
+                        );
+
+                // 요청에 사용할 인증 컨텍스트 생성
+                SecurityContext context =
+                        SecurityContextHolder.createEmptyContext();
+
+                context.setAuthentication(authentication);
+
+                SecurityContextHolder.setContext(context);
             }
-
-            // 6. 다음 필터 실행
-            filterChain.doFilter(request, response);
-
-        } finally {
-
-            // 요청 처리가 끝난 뒤 인증 정보 정리
-            SecurityContextHolder.clearContext();
         }
+
+        filterChain.doFilter(request, response);
     }
 
     /**
-     * Authorization 헤더에서 Bearer Token을 추출한다.
-     *
-     * @param request HTTP 요청
-     * @return JWT 문자열 또는 null
+     * Authorization: Bearer {token}
+     * 형식에서 토큰 문자열만 추출한다.
      */
     private String resolveToken(HttpServletRequest request) {
 
-        String bearerToken =
-                request.getHeader(AUTHORIZATION_HEADER);
+        String authorization =
+                request.getHeader("Authorization");
 
-        // 헤더가 없거나 Bearer 방식이 아니면 null 반환
-        if (bearerToken == null
-                || !bearerToken.startsWith(BEARER_PREFIX)) {
-
+        if (authorization == null
+                || !authorization.startsWith(BEARER_PREFIX)) {
             return null;
         }
 
-        // "Bearer " 이후의 JWT 문자열만 반환
-        return bearerToken.substring(BEARER_PREFIX.length());
+        String token =
+                authorization.substring(BEARER_PREFIX.length());
+
+        return token.isBlank() ? null : token;
     }
 }
