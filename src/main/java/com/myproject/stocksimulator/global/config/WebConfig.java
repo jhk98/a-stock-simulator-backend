@@ -8,13 +8,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * 웹 관련 공통 설정 클래스
  *
- * React 프론트엔드에서 Spring Boot API에 접근할 수 있도록
- * CORS(Cross-Origin Resource Sharing) 정책을 설정한다.
+ * <p>React 프론트엔드에서 Spring Boot API에 접근할 수 있도록
+ * CORS(Cross-Origin Resource Sharing) 정책을 설정한다.</p>
  *
- * 허용할 프론트엔드 주소는 application.properties 또는
- * CORS_ALLOWED_ORIGINS 환경변수에서 관리한다.
+ * <p>허용할 프론트엔드 주소는 application.properties 또는
+ * CORS_ALLOWED_ORIGINS 환경변수에서 관리한다.</p>
  *
- * Spring Security 및 JWT 인증 환경에서 Authorization 헤더와 Refresh Token 쿠키를 사용할 수 있도록 구성한다.
+ * <p>Spring Security 및 JWT 인증 환경에서 Authorization 헤더와 Refresh Token 쿠키를 사용할 수 있도록 구성한다.</p>
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
