@@ -2,15 +2,22 @@ package com.myproject.stocksimulator.security.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
- * 권한이 부족한 요청에 HTTP 403을 반환한다.
+ * HTTP 403 Forbidden 처리
+ *
+ * 로그인은 되어 있지만 요청한 작업을 수행할
+ * 권한이 없는 경우 실행된다.
+ *
+ * 403: 접근 권한 부족
  */
 @Component
 public class JwtAccessDeniedHandler
@@ -24,17 +31,17 @@ public class JwtAccessDeniedHandler
     ) throws IOException {
 
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
+
+        response.setCharacterEncoding(
+                StandardCharsets.UTF_8.name()
+        );
+
+        response.setContentType(
+                MediaType.APPLICATION_JSON_VALUE
+        );
 
         response.getWriter().write(
-                """
-                {
-                  "status": 403,
-                  "code": "FORBIDDEN",
-                  "message": "해당 기능에 접근할 권한이 없습니다."
-                }
-                """
+                "{\"message\":\"접근 권한이 없습니다.\"}"
         );
     }
 }

@@ -1,16 +1,17 @@
 package com.myproject.stocksimulator.security.jwt;
 
-import com.myproject.stocksimulator.domain.member.Member;
-import com.myproject.stocksimulator.domain.member.MemberStatus;
 import com.myproject.stocksimulator.repository.MemberRepository;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -19,16 +20,24 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * HTTP 요청에 포함된 JWT Access Token을 검증하는 필터
+ * JWT 인증 필터
  *
- * 유효한 토큰이라도 회원이 탈퇴했거나 삭제되었다면
- * 인증 정보를 등록하지 않는다.
+ * 클라이언트의 HTTP 요청에서 Access Token을 추출하고
+ * 유효한 토큰이면 Spring Security에 인증 정보를 등록한다.
+ *
+ * 요청 헤더 예시:
+ * Authorization: Bearer eyJhbGciOi...
+ *
+ * 처리 순서:
+ * 1. Authorization 헤더 확인
+ * 2. Bearer 토큰 추출
+ * 3. JWT 서명 및 만료 검증
+ * 4. 회원 존재 여부 확인
+ * 5. SecurityContext에 인증 정보 저장
  */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-    private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
@@ -40,68 +49,55 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String token = resolveToken(request);
+        // 1. Authorization 헤더 조회
+        String authorization =
+                request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        // 유효한 Access Token인 경우에만 인증 처리
-        if (token != null
-                && SecurityContextHolder.getContext().getAuthentication() == null
-                && jwtTokenProvider.validateAccessToken(token)) {
+        // 2. Bearer 토큰이 없으면 다음 필터로 이동
+        //    공개 API도 이 필터를 통과해야 하기 때문이다.
+        if (authorization == null
+                || !authorization.startsWith("Bearer ")) {
 
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // 3. "Bearer " 이후의 JWT 추출
+        String token = authorization.substring(7);
+
+        try {
+
+            // 4. JWT 검증 및 회원 ID 추출
             Long memberId = jwtTokenProvider.getMemberId(token);
 
-            // 실제 DB에서 활성 회원 확인
-            Member member = memberRepository
-                    .findByIdAndStatus(
-                            memberId,
-                            MemberStatus.ACTIVE
-                    )
-                    .orElse(null);
+            // 5. 회원이 실제로 존재하는지 확인
+            if (memberRepository.existsById(memberId)) {
 
-            if (member != null && member.getRole() != null) {
-
-                // DB에 저장된 실제 권한 사용
-                SimpleGrantedAuthority authority =
-                        new SimpleGrantedAuthority(
-                                "ROLE_" + member.getRole().name()
-                        );
-
+                // Spring Security 인증 객체 생성
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
-                                member.getId(),
+                                memberId,
                                 null,
-                                List.of(authority)
+                                List.of(
+                                        new SimpleGrantedAuthority(
+                                                "ROLE_USER"
+                                        )
+                                )
                         );
 
-                // 요청에 사용할 인증 컨텍스트 생성
-                SecurityContext context =
-                        SecurityContextHolder.createEmptyContext();
-
-                context.setAuthentication(authentication);
-
-                SecurityContextHolder.setContext(context);
+                // 인증 성공 상태 저장
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
             }
+
+        } catch (RuntimeException e) {
+
+            // JWT가 잘못되었거나 만료된 경우
+            // 인증 정보를 제거한다.
+            SecurityContextHolder.clearContext();
         }
 
+        // 6. 다음 Spring Security 필터 실행
         filterChain.doFilter(request, response);
-    }
-
-    /**
-     * Authorization: Bearer {token}
-     * 형식에서 토큰 문자열만 추출한다.
-     */
-    private String resolveToken(HttpServletRequest request) {
-
-        String authorization =
-                request.getHeader("Authorization");
-
-        if (authorization == null
-                || !authorization.startsWith(BEARER_PREFIX)) {
-            return null;
-        }
-
-        String token =
-                authorization.substring(BEARER_PREFIX.length());
-
-        return token.isBlank() ? null : token;
     }
 }

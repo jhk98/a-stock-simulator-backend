@@ -2,15 +2,22 @@ package com.myproject.stocksimulator.security.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
- * 인증되지 않은 요청에 HTTP 401을 반환한다.
+ * HTTP 401 Unauthorized 처리
+ *
+ * 인증이 필요한 API에 로그인하지 않고 접근하거나
+ * 유효한 인증 정보가 없는 경우 실행된다.
+ *
+ * 401: 인증되지 않은 사용자
  */
 @Component
 public class JwtAuthenticationEntryPoint
@@ -24,17 +31,17 @@ public class JwtAuthenticationEntryPoint
     ) throws IOException {
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
+
+        response.setCharacterEncoding(
+                StandardCharsets.UTF_8.name()
+        );
+
+        response.setContentType(
+                MediaType.APPLICATION_JSON_VALUE
+        );
 
         response.getWriter().write(
-                """
-                {
-                  "status": 401,
-                  "code": "UNAUTHORIZED",
-                  "message": "로그인이 필요하거나 인증 토큰이 유효하지 않습니다."
-                }
-                """
+                "{\"message\":\"인증이 필요합니다.\"}"
         );
     }
 }
