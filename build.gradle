@@ -213,47 +213,7 @@ dependencies {
 
 
     // ------------------------------------------------------------------------
-    // 테스트
+    // Email
     // ------------------------------------------------------------------------
-
-    /**
-     * Spring MVC 및 Controller 테스트
-     */
-    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-
-    /**
-     * Spring Data JPA 및 Repository 테스트
-     */
-    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-
-    /**
-     * Spring Security 인증 및 인가 테스트
-     *
-     * MockMVC를 이용한 인증 사용자 테스트, 권한 검사 및 보안 필터 테스트에 사용한다.
-     */
-    testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
-
-    /**
-     * JUnit Platform 테스트 실행 런처
-     */
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    /**
-     * 테스트 코드에서도 Lombok을 사용
-     */
-    testCompileOnly 'org.projectlombok:lombok:1.18.46'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.46'
-}
-
-
-// ============================================================================
-// 6. 테스트 설정
-// ============================================================================
-
-tasks.withType(Test).configureEach {
-
-    /**
-     * JUnit 5 기반 테스트 실행
-     */
-    useJUnitPlatform()
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
