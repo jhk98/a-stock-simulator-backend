@@ -3,8 +3,8 @@ package com.myproject.stocksimulator.login.dto;
 /**
  * 로그인 성공 응답 DTO
  *
- * Access Token은 JSON 응답으로 전달한다.
- * Refresh Token은 별도의 HttpOnly 쿠키로 전달하므로 이 DTO에 포함하지 않는다.
+ * <p> Access Token은 JSON 응답으로 전달한다.
+ * Refresh Token은 별도의 HttpOnly 쿠키로 전달하므로 이 DTO에 포함하지 않는다. </p>
  */
 public record LoginResponse(
 

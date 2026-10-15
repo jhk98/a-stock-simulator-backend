@@ -22,11 +22,13 @@ import java.time.Duration;
 /**
  * 로그인 및 인증 API Controller
  *
+ * <p>
  * 주요 API:
  * POST /auth/login   - 로그인
  * POST /auth/refresh - Access Token 재발급
  * POST /auth/logout  - 로그아웃
  * GET  /auth/csrf    - CSRF 토큰 발급
+ * </p>
  *
  * 패키지는 login이지만 기존 프론트엔드와의
  * 호환성을 위해 API 주소는 /auth를 유지한다.
@@ -49,8 +51,8 @@ public class LoginController {
     /**
      * 로그인 API
      *
-     * Access Token은 JSON 응답으로 반환한다.
-     * Refresh Token은 HttpOnly 쿠키에 저장한다.
+     * <p> Access Token은 JSON 응답으로 반환한다.
+     * Refresh Token은 HttpOnly 쿠키에 저장한다. </p>
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
@@ -70,8 +72,8 @@ public class LoginController {
     /**
      * Access Token 재발급 API
      *
-     * 브라우저가 보낸 Refresh Token 쿠키를 검증하고
-     * 새 Access Token과 Refresh Token을 발급한다.
+     * <p> 브라우저가 보낸 Refresh Token 쿠키를 검증하고
+     * 새 Access Token과 Refresh Token을 발급한다. </p>
      *
      * 이 API는 CSRF 검증도 통과해야 한다.
      */
@@ -102,8 +104,10 @@ public class LoginController {
     /**
      * 로그아웃 API
      *
+     * <p>
      * 1. Redis의 Refresh Token 삭제
      * 2. 브라우저 Refresh Token 쿠키 만료
+     * </p>
      */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
@@ -137,8 +141,8 @@ public class LoginController {
     /**
      * CSRF 토큰 발급 API
      *
-     * 프론트엔드는 이 API를 호출하여 XSRF-TOKEN 쿠키를 받고,
-     * Refresh / Logout 요청 시 X-XSRF-TOKEN 헤더로 전달한다.
+     * <p> 프론트엔드는 이 API를 호출하여 XSRF-TOKEN 쿠키를 받고,
+     * Refresh / Logout 요청 시 X-XSRF-TOKEN 헤더로 전달한다. </p>
      */
     @GetMapping("/csrf")
     public ResponseEntity<Void> csrf(CsrfToken csrfToken) {
@@ -152,20 +156,24 @@ public class LoginController {
     /**
      * Refresh Token 쿠키 생성
      *
+     * <p>
      * HttpOnly:
      * JavaScript에서 쿠키 내용을 읽을 수 없도록 한다.
      *
+     * <p>
      * Secure:
      * true일 때 HTTPS 연결에서만 전송한다.
+     * </p>
      *
+     * <p>
      * SameSite=Lax:
      * 다른 사이트에서 발생한 일부 요청의 쿠키 전송을 제한한다.
+     * </p>
      */
     private void addRefreshCookie(
             HttpServletResponse response,
             String token
     ) {
-
         ResponseCookie cookie = ResponseCookie
                 .from("refreshToken", token)
                 .httpOnly(true)

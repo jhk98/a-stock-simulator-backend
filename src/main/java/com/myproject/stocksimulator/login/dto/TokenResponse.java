@@ -3,7 +3,7 @@ package com.myproject.stocksimulator.login.dto;
 /**
  * Access Token 재발급 응답 DTO
  *
- * Refresh Token으로 새로운 Access Token을 발급받았을 때 사용한다.
+ * <p> Refresh Token으로 새로운 Access Token을 발급받았을 때 사용한다. </p>
  */
 public record TokenResponse(
 

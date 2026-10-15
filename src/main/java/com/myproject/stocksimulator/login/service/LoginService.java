@@ -21,14 +21,16 @@ import java.util.Base64;
 /**
  * 로그인 서비스
  *
+ * <p>
  * 주요 기능:
  * 1. 아이디와 비밀번호 검증
  * 2. Access Token 발급
  * 3. Refresh Token 발급 및 Redis 저장
  * 4. Access Token 재발급
  * 5. 로그아웃
+ * </p>
  *
- * 비밀번호는 BCrypt matches()로 검증한다.
+ * <p> 비밀번호는 BCrypt matches()로 검증한다. </p>
  *
  * Access Token: JWT
  * Refresh Token: SecureRandom으로 생성한 랜덤 문자열
@@ -52,12 +54,14 @@ public class LoginService {
     /**
      * 로그인 처리
      *
+     * <p>
      * 처리 순서:
      * 1. 아이디로 회원 조회
      * 2. BCrypt 비밀번호 검증
      * 3. 마지막 로그인 시간 갱신
      * 4. Access Token 발급
      * 5. Refresh Token 발급 및 Redis 저장
+     * </p>
      */
     @Transactional
     public LoginResult login(LoginRequest request) {
@@ -102,8 +106,8 @@ public class LoginService {
     /**
      * Refresh Token 발급
      *
-     * 32바이트 랜덤 데이터를 Base64 URL 문자열로 변환한다.
-     * 생성한 토큰은 Redis에 유효기간과 함께 저장한다.
+     * <p> 32바이트 랜덤 데이터를 Base64 URL 문자열로 변환한다.
+     * 생성한 토큰은 Redis에 유효기간과 함께 저장한다. </p>
      */
     private String issueRefreshToken(Long memberId) {
 
@@ -127,8 +131,8 @@ public class LoginService {
     /**
      * Access Token 재발급
      *
-     * 기존 Refresh Token을 소비하고
-     * 새로운 Access Token과 Refresh Token을 발급한다.
+     * <p> 기존 Refresh Token을 소비하고
+     * 새로운 Access Token과 Refresh Token을 발급한다. </p>
      *
      * 기존 Refresh Token은 다시 사용할 수 없다.
      */
@@ -171,7 +175,7 @@ public class LoginService {
     /**
      * 로그아웃 처리
      *
-     * 전달받은 Refresh Token을 Redis에서 삭제한다.
+     * <p> 전달받은 Refresh Token을 Redis에서 삭제한다. </p>
      *
      * 이미 발급된 Access Token은 만료 전까지
      * 유효할 수 있으므로 프론트에서도 반드시 제거해야 한다.

@@ -14,8 +14,10 @@ import java.nio.charset.StandardCharsets;
 /**
  * HTTP 401 Unauthorized 처리
  *
+ * <p>
  * 인증이 필요한 API에 로그인하지 않고 접근하거나
  * 유효한 인증 정보가 없는 경우 실행된다.
+ * </p>
  *
  * 401: 인증되지 않은 사용자
  */

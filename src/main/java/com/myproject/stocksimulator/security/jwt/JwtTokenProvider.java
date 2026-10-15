@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,16 +17,20 @@ import java.util.Date;
 /**
  * JWT 생성 및 검증 클래스
  *
+ * <p>
  * 주요 기능:
  * 1. Access Token 생성
  * 2. JWT 서명 및 만료시간 검증
  * 3. JWT에서 회원 ID 추출
+ * </p>
  *
  * JWT Payload의 subject에는 회원 ID를 저장한다.
  *
+ * <p>
  * 주의:
  * JWT는 암호화가 아니라 서명 기반 토큰이다.
  * 비밀번호 등 민감한 개인정보를 Payload에 넣지 않는다.
+ * </p>
  */
 @Component
 public class JwtTokenProvider {
@@ -34,6 +39,7 @@ public class JwtTokenProvider {
     private final SecretKey secretKey;
 
     // Access Token 유효기간 (초)
+    @Getter
     private final long accessExpirationSeconds;
 
     /**
@@ -67,9 +73,11 @@ public class JwtTokenProvider {
     /**
      * Access Token 생성
      *
+     * <p>
      * subject: 회원 ID
      * issuedAt: 토큰 발급 시간
      * expiration: 토큰 만료 시간
+     * </p>
      */
     public String createAccessToken(Long memberId) {
 
@@ -88,7 +96,7 @@ public class JwtTokenProvider {
     /**
      * JWT 서명과 만료시간을 검증한 뒤 회원 ID 반환
      *
-     * 유효하지 않은 JWT는 예외가 발생한다.
+     * <p> 유효하지 않은 JWT는 예외가 발생한다. </p>
      */
     public Long getMemberId(String token) throws JwtException {
 
@@ -99,12 +107,5 @@ public class JwtTokenProvider {
                 .getPayload();
 
         return Long.valueOf(claims.getSubject());
-    }
-
-    /**
-     * Access Token 유효기간 반환
-     */
-    public long getAccessExpirationSeconds() {
-        return accessExpirationSeconds;
     }
 }

@@ -21,13 +21,14 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 /**
  * Spring Security 설정
- *
+ * <p>
  * 주요 역할:
  * 1. JWT 인증 필터 등록
  * 2. 공개 API와 인증 필수 API 구분
  * 3. 서버 세션 비활성화
  * 4. CORS 및 CSRF 설정
  * 5. 401 / 403 오류 처리
+ * </p>
  *
  * 로그인 세션 대신 JWT 기반 인증을 사용한다.
  */
@@ -43,11 +44,15 @@ public class SecurityConfig {
     /**
      * JWT 필터의 중복 등록 방지
      *
+     * <p>
      * JwtAuthenticationFilter는 @Component이므로
      * 일반 서블릿 필터로 자동 등록될 수 있다.
+     * </p>
      *
+     * <p>
      * 여기서는 자동 등록을 비활성화하고
      * Spring Security 필터 체인에서만 실행하도록 한다.
+     * </p>
      */
     @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter>
@@ -175,7 +180,6 @@ public class SecurityConfig {
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 );
-
         return http.build();
     }
 }

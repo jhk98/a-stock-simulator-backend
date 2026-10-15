@@ -22,11 +22,10 @@ import java.util.List;
 /**
  * JWT 인증 필터
  *
+ * <p>
  * 클라이언트의 HTTP 요청에서 Access Token을 추출하고
  * 유효한 토큰이면 Spring Security에 인증 정보를 등록한다.
- *
- * 요청 헤더 예시:
- * Authorization: Bearer eyJhbGciOi...
+ * </p>
  *
  * 처리 순서:
  * 1. Authorization 헤더 확인
