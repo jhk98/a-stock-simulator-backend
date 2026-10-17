@@ -15,6 +15,12 @@ public record LoginResponse(
     String tokenType,
 
     // Access Token 유효기간 (초)
-    long expiresIn
+    long expiresIn,
+
+    Long memberId,
+
+    String loginId,
+
+    String name
 ) {
 }
