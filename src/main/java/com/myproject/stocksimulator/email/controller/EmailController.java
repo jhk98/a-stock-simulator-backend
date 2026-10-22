@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 이메일 인증 API
+ * 요청 형식을 검증하고 실제 인증 처리는 EmailService에 맡긴다.
+ */
 @RestController
 @RequestMapping("/emails")
 @RequiredArgsConstructor
@@ -23,39 +27,30 @@ public class EmailController {
     private final EmailService emailService;
 
     /**
-     * 이메일 인증번호 발송
+     * 입력한 이메일로 인증번호를 발송한다.
+     * POST /emails/send
      */
     @PostMapping("/send")
-    public ResponseEntity<String> send(
-            @Valid @RequestBody EmailSendRequest request
-    ) {
+    public ResponseEntity<String> send(@Valid @RequestBody EmailSendRequest request) {
         emailService.sendCode(request.email());
 
-        return ResponseEntity.ok(
-                "인증번호 발송 요청이 처리되었습니다."
-        );
+        return ResponseEntity.ok("인증번호 발송 요청이 처리되었습니다.");
     }
 
     /**
-     * 이메일 인증번호 확인
-     *
-     * <p>
-     * 성공: HTTP 200, true
-     * 실패: HTTP 400, ErrorResponse
-     * </p>
+     * 인증번호를 확인한다.
+     * 성공하면 true, 실패하면 오류 응답을 반환한다.
+     * POST /emails/verify
      */
     @PostMapping("/verify")
-    public ResponseEntity<?> verify(
-            @Valid @RequestBody EmailVerifyRequest request
-    ) {
+    public ResponseEntity<?> verify(@Valid @RequestBody EmailVerifyRequest request) {
         boolean verified = emailService.verifyCode(
                 request.email(),
                 request.code()
         );
 
         if (!verified) {
-            return ResponseEntity
-                    .badRequest()
+            return ResponseEntity.badRequest()
                     .body(new ErrorResponse(
                             400,
                             "EMAIL_VERIFICATION_FAILED",
