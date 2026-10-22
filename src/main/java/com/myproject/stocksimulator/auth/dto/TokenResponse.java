@@ -1,4 +1,4 @@
-package com.myproject.stocksimulator.login.dto;
+package com.myproject.stocksimulator.auth.dto;
 
 /**
  * Access Token 재발급 응답 DTO

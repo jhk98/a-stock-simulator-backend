@@ -1,4 +1,4 @@
-package com.myproject.stocksimulator.login.service;
+package com.myproject.stocksimulator.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;

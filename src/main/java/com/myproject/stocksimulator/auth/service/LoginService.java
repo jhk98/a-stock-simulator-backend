@@ -1,10 +1,10 @@
-package com.myproject.stocksimulator.login.service;
+package com.myproject.stocksimulator.auth.service;
 
-import com.myproject.stocksimulator.domain.Member;
-import com.myproject.stocksimulator.login.dto.LoginRequest;
-import com.myproject.stocksimulator.login.dto.LoginResponse;
-import com.myproject.stocksimulator.login.dto.TokenResponse;
-import com.myproject.stocksimulator.repository.MemberRepository;
+import com.myproject.stocksimulator.member.entity.Member;
+import com.myproject.stocksimulator.auth.dto.LoginRequest;
+import com.myproject.stocksimulator.auth.dto.LoginResponse;
+import com.myproject.stocksimulator.auth.dto.TokenResponse;
+import com.myproject.stocksimulator.member.repository.MemberRepository;
 import com.myproject.stocksimulator.security.jwt.JwtTokenProvider;
 
 import jakarta.annotation.PostConstruct;

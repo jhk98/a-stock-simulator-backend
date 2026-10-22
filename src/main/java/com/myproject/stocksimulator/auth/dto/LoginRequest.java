@@ -1,4 +1,4 @@
-package com.myproject.stocksimulator.login.dto;
+package com.myproject.stocksimulator.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

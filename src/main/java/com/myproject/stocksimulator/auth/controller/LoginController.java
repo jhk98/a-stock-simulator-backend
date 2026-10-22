@@ -1,9 +1,9 @@
-package com.myproject.stocksimulator.login.controller;
+package com.myproject.stocksimulator.auth.controller;
 
-import com.myproject.stocksimulator.login.dto.LoginRequest;
-import com.myproject.stocksimulator.login.dto.LoginResponse;
-import com.myproject.stocksimulator.login.dto.TokenResponse;
-import com.myproject.stocksimulator.login.service.LoginService;
+import com.myproject.stocksimulator.auth.dto.LoginRequest;
+import com.myproject.stocksimulator.auth.dto.LoginResponse;
+import com.myproject.stocksimulator.auth.dto.TokenResponse;
+import com.myproject.stocksimulator.auth.service.LoginService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
