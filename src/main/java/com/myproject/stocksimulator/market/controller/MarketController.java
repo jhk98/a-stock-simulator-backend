@@ -2,6 +2,7 @@ package com.myproject.stocksimulator.market.controller;
 
 import com.myproject.stocksimulator.exception.ErrorResponse;
 import com.myproject.stocksimulator.market.service.MarketService;
+import com.myproject.stocksimulator.stock.scheduler.QuoteScheduler;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
@@ -15,14 +16,21 @@ import org.springframework.web.bind.annotation.*;
 public class MarketController {
 
     private final MarketService market;
+    private final QuoteScheduler quoteScheduler;
 
-    public MarketController(MarketService market) {
+    public MarketController(
+            MarketService market,
+            QuoteScheduler quoteScheduler
+    ) {
         this.market = market;
+        this.quoteScheduler = quoteScheduler;
     }
 
     /**
-     * 종목 검색과 정렬
-     * 정렬을 지정하지 않으면 현재가 높은순으로 조회한다.
+     * DB에 저장된 종목·시세를 즉시 반환한다.
+     *
+     * 현재 페이지에서 미수집되었거나 오래된 시세는
+     * 백그라운드 수집 대기열에 등록한다.
      */
     @GetMapping("/stocks")
     public ResponseEntity<MarketService.StockPage> stocks(
@@ -32,12 +40,22 @@ public class MarketController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
+        MarketService.StockPage result = this.market.search(
+                market,
+                keyword,
+                sort,
+                page,
+                size
+        );
+
+        // 등록만 수행하며 외부 시세 API 응답을 기다리지 않는다.
+        quoteScheduler.prioritize(result.items());
+
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore())
-                .body(this.market.search(market, keyword, sort, page, size));
+                .body(result);
     }
 
-    // 기존 메인 화면의 거래대금 순위 조회를 유지한다.
     @GetMapping("/popular")
     public ResponseEntity<MarketService.Ranking> popular() {
         return ResponseEntity.ok()
