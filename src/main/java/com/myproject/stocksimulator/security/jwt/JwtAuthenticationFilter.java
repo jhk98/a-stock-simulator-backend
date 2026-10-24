@@ -1,6 +1,6 @@
 package com.myproject.stocksimulator.security.jwt;
 
-import com.myproject.stocksimulator.repository.MemberRepository;
+import com.myproject.stocksimulator.member.repository.MemberRepository;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
