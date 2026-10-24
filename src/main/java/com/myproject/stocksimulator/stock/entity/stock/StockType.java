@@ -1,4 +1,4 @@
-package com.myproject.stocksimulator.stock.entity;
+package com.myproject.stocksimulator.stock.entity.stock;
 
 import java.util.Locale;
 

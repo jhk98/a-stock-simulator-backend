@@ -3,8 +3,8 @@ package com.myproject.stocksimulator.market.service;
 import com.myproject.stocksimulator.kiwoom.KiwoomApiException;
 import com.myproject.stocksimulator.kiwoom.KiwoomAuthService;
 import com.myproject.stocksimulator.kiwoom.client.KiwoomHttpClient;
-import com.myproject.stocksimulator.stock.entity.Stock;
-import com.myproject.stocksimulator.stock.entity.StockType;
+import com.myproject.stocksimulator.stock.entity.stock.Stock;
+import com.myproject.stocksimulator.stock.entity.stock.StockType;
 import com.myproject.stocksimulator.stock.repository.StockRepository;
 
 import jakarta.persistence.EntityManager;

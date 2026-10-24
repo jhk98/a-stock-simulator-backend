@@ -1,12 +1,12 @@
 package com.myproject.stocksimulator.stock.service;
 
-import com.myproject.stocksimulator.entity.CurrentPrice;
+import com.myproject.stocksimulator.stock.entity.currentPrice.CurrentPrice;
 import com.myproject.stocksimulator.kiwoom.KiwoomApiException;
 import com.myproject.stocksimulator.kiwoom.KiwoomAuthService;
 import com.myproject.stocksimulator.kiwoom.client.KiwoomHttpClient;
 import com.myproject.stocksimulator.market.service.MarketService;
-import com.myproject.stocksimulator.stock.entity.Stock;
-import com.myproject.stocksimulator.stock.entity.StockType;
+import com.myproject.stocksimulator.stock.entity.stock.Stock;
+import com.myproject.stocksimulator.stock.entity.stock.StockType;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;

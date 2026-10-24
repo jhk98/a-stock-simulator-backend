@@ -1,6 +1,6 @@
 package com.myproject.stocksimulator.stock.repository;
 
-import com.myproject.stocksimulator.stock.entity.Stock;
+import com.myproject.stocksimulator.stock.entity.stock.Stock;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

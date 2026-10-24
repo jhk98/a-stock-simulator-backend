@@ -1,6 +1,6 @@
 package com.myproject.stocksimulator.member.controller;
 
-import com.myproject.stocksimulator.global.exception.ErrorResponse;
+import com.myproject.stocksimulator.exception.ErrorResponse;
 import com.myproject.stocksimulator.member.dto.MemberResponse;
 import com.myproject.stocksimulator.member.dto.MemberUpdateRequest;
 import com.myproject.stocksimulator.member.service.MemberService;

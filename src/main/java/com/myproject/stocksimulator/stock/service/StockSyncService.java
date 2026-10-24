@@ -2,7 +2,7 @@ package com.myproject.stocksimulator.stock.service;
 
 import com.myproject.stocksimulator.kiwoom.client.KiwoomStockClient;
 import com.myproject.stocksimulator.kiwoom.KiwoomStockInfo;
-import com.myproject.stocksimulator.stock.entity.StockType;
+import com.myproject.stocksimulator.stock.entity.stock.StockType;
 import com.myproject.stocksimulator.stock.dto.StockSyncResult;
 
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
 package com.myproject.stocksimulator.stock.service;
 
-import com.myproject.stocksimulator.stock.entity.Stock;
-import com.myproject.stocksimulator.stock.entity.StockType;
+import com.myproject.stocksimulator.stock.entity.stock.Stock;
+import com.myproject.stocksimulator.stock.entity.stock.StockType;
 import com.myproject.stocksimulator.stock.dto.StockSyncResult;
 import com.myproject.stocksimulator.stock.repository.StockRepository;
 

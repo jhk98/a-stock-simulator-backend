@@ -2,9 +2,9 @@ package com.myproject.stocksimulator.stock.service;
 
 import com.myproject.stocksimulator.account.entity.Account;
 import com.myproject.stocksimulator.entity.Holding;
-import com.myproject.stocksimulator.entity.orders.Orders;
-import com.myproject.stocksimulator.entity.orders.OrderType;
-import com.myproject.stocksimulator.stock.entity.Stock;
+import com.myproject.stocksimulator.stock.entity.orders.Orders;
+import com.myproject.stocksimulator.stock.entity.orders.OrderType;
+import com.myproject.stocksimulator.stock.entity.stock.Stock;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
