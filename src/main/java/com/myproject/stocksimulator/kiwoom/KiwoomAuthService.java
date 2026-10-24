@@ -1,6 +1,7 @@
 package com.myproject.stocksimulator.kiwoom;
 
 import com.myproject.stocksimulator.kiwoom.client.KiwoomAuthClient;
+
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -9,6 +10,9 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 
+/**
+ * 키움 API 접근 토큰 발급과 재사용
+ */
 @Service
 public class KiwoomAuthService {
 
@@ -21,24 +25,30 @@ public class KiwoomAuthService {
     private final KiwoomAuthClient authClient;
 
     private String accessToken;
+
+    // 외부 조회용 getter는 없어도 내부 만료 검사에는 필요한 값이다.
     private Instant expiresAt;
+
     private Instant retryAfter = Instant.EPOCH;
 
     public KiwoomAuthService(KiwoomAuthClient authClient) {
         this.authClient = authClient;
     }
 
+    /**
+     * 만료가 임박하지 않았다면 기존 토큰을 반환한다.
+     * 동시에 여러 요청이 들어와도 토큰 발급을 직렬화한다.
+     */
     public synchronized String getAccessToken() {
         Instant now = Instant.now();
 
-        // 만료 1분 전까지는 기존 토큰을 재사용합니다.
         if (accessToken != null
                 && expiresAt != null
                 && now.isBefore(expiresAt.minusSeconds(60))) {
             return accessToken;
         }
 
-        // 발급 실패 직후 요청이 몰려도 발급 API를 계속 호출하지 않습니다.
+        // 발급 실패 직후 같은 요청이 반복되는 것을 제한한다.
         if (now.isBefore(retryAfter)) {
             throw new KiwoomApiException(
                     0,
@@ -59,7 +69,7 @@ public class KiwoomAuthService {
                 throw KiwoomApiException.invalidResponse();
             }
 
-            // EC2/Docker 기본 시간대와 무관하게 한국 시각으로 해석합니다.
+            // 서버 기본 시간대와 관계없이 한국 시각으로 해석한다.
             Instant parsedExpiresAt = LocalDateTime.parse(
                     response.expiresDt(),
                     FORMATTER
@@ -69,39 +79,33 @@ public class KiwoomAuthService {
                 throw KiwoomApiException.invalidResponse();
             }
 
-            // 모든 검증이 끝난 다음 캐시를 교체합니다.
+            // 응답 검증이 끝난 뒤 토큰 캐시를 변경한다.
             accessToken = response.token();
             expiresAt = parsedExpiresAt;
             retryAfter = Instant.EPOCH;
 
             return accessToken;
-
-        } catch (RuntimeException e) {
+        } catch (RuntimeException exception) {
             accessToken = null;
             expiresAt = null;
             retryAfter = Instant.now().plusSeconds(10);
 
-            if (e instanceof KiwoomApiException exception) {
-                throw exception;
+            if (exception instanceof KiwoomApiException apiException) {
+                throw apiException;
             }
 
             throw KiwoomApiException.invalidResponse();
         }
     }
 
-    // 실패한 요청에서 사용한 토큰이 현재 캐시와 같을 때만 무효화합니다.
-    // 이미 새 토큰이 발급됐다면 그 새 토큰은 지우지 않습니다.
+    /**
+     * 실패한 요청에서 사용한 토큰이 현재 토큰과 같을 때만 제거한다.
+     * 다른 요청이 이미 새로 발급한 토큰을 지우지 않는다.
+     */
     public synchronized void invalidateIfSame(String failedToken) {
         if (failedToken != null && failedToken.equals(accessToken)) {
             accessToken = null;
             expiresAt = null;
         }
-    }
-
-    // 기존 테스트에서 사용하는 메서드 형태를 유지합니다.
-    public synchronized LocalDateTime getExpiresAt() {
-        return expiresAt == null
-                ? null
-                : LocalDateTime.ofInstant(expiresAt, KOREA);
     }
 }

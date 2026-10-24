@@ -1,7 +1,7 @@
 package com.myproject.stocksimulator.stock.service;
 
 import com.myproject.stocksimulator.account.entity.Account;
-import com.myproject.stocksimulator.entity.Holding;
+import com.myproject.stocksimulator.stock.entity.holding.Holding;
 import com.myproject.stocksimulator.stock.entity.orders.Orders;
 import com.myproject.stocksimulator.stock.entity.orders.OrderType;
 import com.myproject.stocksimulator.stock.entity.stock.Stock;

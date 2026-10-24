@@ -1,7 +1,13 @@
 package com.myproject.stocksimulator.stock.entity.stock;
 
-import java.util.Locale;
-
+/**
+ * 지원하는 국내 주식 시장
+ *
+ * <p>
+ * enum 이름은 DB 저장과 화면 시장 구분에 사용한다.
+ * kiwoomMarketCode는 키움 종목 목록 조회에 사용한다.
+ * </p>
+ */
 public enum StockType {
 
     KOSPI("0"),
@@ -13,26 +19,10 @@ public enum StockType {
         this.kiwoomMarketCode = kiwoomMarketCode;
     }
 
+    /**
+     * StockSyncService가 시장별 종목을 수집할 때 사용한다.
+     */
     public String kiwoomMarketCode() {
         return kiwoomMarketCode;
-    }
-
-    public static StockType parse(String value) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(
-                    "시장 구분이 비어 있습니다."
-            );
-        }
-
-        String normalized = value.trim()
-                .toUpperCase(Locale.ROOT);
-
-        try {
-            return StockType.valueOf(normalized);
-        } catch (IllegalArgumentException exception) {
-            throw new IllegalArgumentException(
-                    "market은 KOSPI 또는 KOSDAQ이어야 합니다."
-            );
-        }
     }
 }
