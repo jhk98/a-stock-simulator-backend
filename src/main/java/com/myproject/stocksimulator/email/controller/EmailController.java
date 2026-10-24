@@ -3,7 +3,7 @@ package com.myproject.stocksimulator.email.controller;
 import com.myproject.stocksimulator.email.dto.EmailSendRequest;
 import com.myproject.stocksimulator.email.dto.EmailVerifyRequest;
 import com.myproject.stocksimulator.email.service.EmailService;
-import com.myproject.stocksimulator.global.exception.ErrorResponse;
+import com.myproject.stocksimulator.exception.ErrorResponse;
 
 import jakarta.validation.Valid;
 

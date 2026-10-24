@@ -1,4 +1,4 @@
-package com.myproject.stocksimulator.global.exception;
+package com.myproject.stocksimulator.exception;
 
 import jakarta.validation.ConstraintViolationException;
 
