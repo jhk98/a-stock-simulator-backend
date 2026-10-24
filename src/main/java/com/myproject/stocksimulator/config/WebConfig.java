@@ -1,4 +1,4 @@
-package com.myproject.stocksimulator.global.config;
+package com.myproject.stocksimulator.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
