@@ -4,15 +4,13 @@ import com.myproject.stocksimulator.kiwoom.KiwoomStockInfo;
 import com.myproject.stocksimulator.kiwoom.KiwoomStockListResponse;
 import com.myproject.stocksimulator.kiwoom.KiwoomApiException;
 import com.myproject.stocksimulator.kiwoom.KiwoomAuthService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+@Slf4j
 @Component
 public class KiwoomStockClient {
 
@@ -31,6 +29,7 @@ public class KiwoomStockClient {
 
     public List<KiwoomStockInfo> getStockList(String marketType) {
         if (!"0".equals(marketType) && !"10".equals(marketType)) {
+            log.error("[KiwoomStockClient][getStockList][ERROR][{}]", "지원하지 않는 시장 구분입니다.");
             throw new IllegalArgumentException("지원하지 않는 시장 구분입니다.");
         }
 
@@ -51,7 +50,8 @@ public class KiwoomStockClient {
                     || body.returnCode() == null
                     || body.returnCode() != 0
                     || body.stocks() == null
-                    || body.stocks().stream().anyMatch(item -> item == null)) {
+                    || body.stocks().stream().anyMatch(Objects::isNull)) {
+                log.error("[KiwoomStockClient][getStockList][ERROR][body: {}][{}]", body, "업무 응답 코드 실패.");
                 throw KiwoomApiException.invalidResponse();
             }
 
@@ -64,6 +64,7 @@ public class KiwoomStockClient {
             }
 
             if (!"Y".equals(contYn)) {
+                log.error("[KiwoomStockClient][getStockList][ERROR][contYn: {}][{}]", contYn, "contYn이 Y가 아님");
                 throw KiwoomApiException.invalidResponse();
             }
 
@@ -73,11 +74,13 @@ public class KiwoomStockClient {
             if (nextKey == null
                     || nextKey.isBlank()
                     || !receivedKeys.add(nextKey)) {
+                log.error("[KiwoomStockClient][getStockList][ERROR][nextKey: {}][{}]", nextKey, "무한 호출 방지");
                 throw KiwoomApiException.invalidResponse();
             }
         }
 
         // 중간까지 받은 결과를 성공한 전체 목록처럼 반환하지 않습니다.
+        log.error("[KiwoomStockClient][getStockList][ERROR][{}]", "종목 연속조회 한도를 초과했습니다.");
         throw new KiwoomApiException(0, "종목 연속조회 한도를 초과했습니다.");
     }
 
@@ -109,10 +112,12 @@ public class KiwoomStockClient {
                     }
                 }
 
+                log.error("[KiwoomStockClient][requestPage][ERROR][API 호출 실패][{}]", e.getMessage(), e);
                 throw e;
             }
         }
 
+        log.error("[KiwoomStockClient][requestPage][ERROR][알 수 없는 API 호출 실패][marketType: {}][nextKey: {}]", marketType, nextKey);
         throw KiwoomApiException.invalidResponse();
     }
 }

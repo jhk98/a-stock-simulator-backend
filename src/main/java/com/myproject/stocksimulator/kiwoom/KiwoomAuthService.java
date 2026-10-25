@@ -2,6 +2,7 @@ package com.myproject.stocksimulator.kiwoom;
 
 import com.myproject.stocksimulator.kiwoom.client.KiwoomAuthClient;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -13,6 +14,7 @@ import java.time.format.ResolverStyle;
 /**
  * 키움 API 접근 토큰 발급과 재사용
  */
+@Slf4j
 @Service
 public class KiwoomAuthService {
 
@@ -50,6 +52,7 @@ public class KiwoomAuthService {
 
         // 발급 실패 직후 같은 요청이 반복되는 것을 제한한다.
         if (now.isBefore(retryAfter)) {
+            log.error("[KiwoomAuthService][getAccessToken][ERROR][키움 토큰 발급 재시도 대기 중입니다.][retryAfter: {}]", retryAfter);
             throw new KiwoomApiException(
                     0,
                     "키움 토큰 발급 재시도 대기 중입니다."
@@ -66,6 +69,7 @@ public class KiwoomAuthService {
                     || response.token().isBlank()
                     || !"bearer".equalsIgnoreCase(response.tokenType())
                     || response.expiresDt() == null) {
+                log.error("[KiwoomAuthService][getAccessToken][ERROR][API 호출 실패][response: {}]", response);
                 throw KiwoomApiException.invalidResponse();
             }
 
@@ -76,6 +80,7 @@ public class KiwoomAuthService {
             ).atZone(KOREA).toInstant();
 
             if (!Instant.now().plusSeconds(60).isBefore(parsedExpiresAt)) {
+                log.error("[KiwoomAuthService][getAccessToken][ERROR][API 유효시간 만료][response: {}][parsedExpiresAt: {}]", response, parsedExpiresAt);
                 throw KiwoomApiException.invalidResponse();
             }
 
@@ -91,9 +96,11 @@ public class KiwoomAuthService {
             retryAfter = Instant.now().plusSeconds(10);
 
             if (exception instanceof KiwoomApiException apiException) {
+                log.error("[KiwoomAuthService][getAccessToken][ERROR][키움 측 알 수 없는 에러][{}]", exception.getMessage(), exception);
                 throw apiException;
             }
 
+            log.error("[KiwoomAuthService][getAccessToken][ERROR][알 수 없는 에러][{}]", exception.getMessage(), exception);
             throw KiwoomApiException.invalidResponse();
         }
     }

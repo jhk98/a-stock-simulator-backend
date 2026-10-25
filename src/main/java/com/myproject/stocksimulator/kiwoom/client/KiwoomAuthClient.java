@@ -2,9 +2,11 @@ package com.myproject.stocksimulator.kiwoom.client;
 
 import com.myproject.stocksimulator.kiwoom.KiwoomTokenRequest;
 import com.myproject.stocksimulator.kiwoom.KiwoomTokenResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class KiwoomAuthClient {
 
@@ -18,6 +20,7 @@ public class KiwoomAuthClient {
             @Value("${kiwoom.api.secret-key}") String secretKey
     ) {
         if (appKey.isBlank() || secretKey.isBlank()) {
+            log.error("[KiwoomAuthClient][ERROR][{}]", "키움 인증 정보가 비어 있습니다.");
             throw new IllegalArgumentException("키움 인증 정보가 비어 있습니다.");
         }
 
@@ -29,17 +32,22 @@ public class KiwoomAuthClient {
     // 이 클래스는 발급 요청만 담당합니다.
     // 토큰 재사용과 만료 판단은 KiwoomAuthService에서 수행합니다.
     public KiwoomTokenResponse issueToken() {
-        return httpClient.post(
-                "/oauth2/token",
-                null,
-                null,
-                null,
-                new KiwoomTokenRequest(
-                        "client_credentials",
-                        appKey,
-                        secretKey
-                ),
-                KiwoomTokenResponse.class
-        ).getBody();
+        try {
+            return httpClient.post(
+                    "/oauth2/token",
+                    null,
+                    null,
+                    null,
+                    new KiwoomTokenRequest(
+                            "client_credentials",
+                            appKey,
+                            secretKey
+                    ),
+                    KiwoomTokenResponse.class
+            ).getBody();
+        } catch (Exception e) {
+            log.error("[KiwoomAuthClient][issueToken][ERROR][{}]", e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
     }
 }

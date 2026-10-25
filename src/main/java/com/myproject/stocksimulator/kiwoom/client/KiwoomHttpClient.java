@@ -2,6 +2,7 @@ package com.myproject.stocksimulator.kiwoom.client;
 
 import com.myproject.stocksimulator.kiwoom.KiwoomApiException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Component
 public class KiwoomHttpClient {
 
@@ -36,10 +38,12 @@ public class KiwoomHttpClient {
                 "https://api.kiwoom.com",
                 "https://mockapi.kiwoom.com"
         ).contains(baseUrl)) {
+            log.error("[KiwoomHttpClient][ERROR][{}]", "키움 API 주소가 올바르지 않습니다.");
             throw new IllegalArgumentException("키움 API 주소가 올바르지 않습니다.");
         }
 
         if (intervalMs < 1 || intervalMs > 60_000) {
+            log.error("[KiwoomHttpClient][ERROR][{}]", "키움 요청 간격이 올바르지 않습니다.");
             throw new IllegalArgumentException("키움 요청 간격이 올바르지 않습니다.");
         }
 
@@ -66,6 +70,7 @@ public class KiwoomHttpClient {
             Class<T> responseType
     ) {
         if (!path.startsWith("/") || path.startsWith("//")) {
+            log.error("[KiwoomHttpClient][post][ERROR][{}]", "상대 API 경로만 사용할 수 있습니다.");
             throw new IllegalArgumentException("상대 API 경로만 사용할 수 있습니다.");
         }
 
@@ -75,6 +80,7 @@ public class KiwoomHttpClient {
             acquired = slots.tryAcquire(1500, TimeUnit.MILLISECONDS);
 
             if (!acquired) {
+                log.error("[KiwoomHttpClient][post][ERROR][{}]", "키움 조회가 밀려 있습니다. 잠시 후 다시 시도해주세요.");
                 throw new KiwoomApiException(
                         429,
                         "키움 조회가 밀려 있습니다. 잠시 후 다시 시도해주세요."
@@ -106,16 +112,20 @@ public class KiwoomHttpClient {
 
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
+            log.error("[KiwoomHttpClient][post][ERROR][{}][{}]", "키움 요청 대기가 중단되었습니다.", exception.getMessage(), exception);
             throw new KiwoomApiException(0, "키움 요청 대기가 중단되었습니다.");
         } catch (RestClientResponseException exception) {
+            log.error("[KiwoomHttpClient][post][ERROR][{}][{}]", "키움 HTTP 요청에 실패했습니다.", exception.getMessage(), exception);
             throw new KiwoomApiException(
                     exception.getStatusCode().value(),
                     "키움 HTTP 요청에 실패했습니다."
             );
         } catch (RestClientException exception) {
+            log.error("[KiwoomHttpClient][post][ERROR][{}][{}]", "키움 통신에 실패했습니다.", exception.getMessage(), exception);
             throw new KiwoomApiException(0, "키움 통신에 실패했습니다.");
         } finally {
             if (acquired) {
+                log.info("[KiwoomHttpClient][post][INFO][API 호출 완료][acquired: {}]", acquired);
                 slots.release();
             }
         }
