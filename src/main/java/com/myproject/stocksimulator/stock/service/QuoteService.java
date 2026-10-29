@@ -12,6 +12,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -21,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -28,15 +31,22 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 /**
- * 현재가 조회와 마지막 수집 시세 저장
+ * 현재가 조회와 마지막 수집 시세 저장.
  *
- * 외부 API 호출과 DB 저장 트랜잭션을 분리한다.
- * 주문 체결가격은 클라이언트 입력이 아닌 이 서비스의 시세를 사용한다.
+ * 외부 API 호출과 DB 트랜잭션을 분리한다.
+ * DB의 updatedAt은 한국 현지 시각으로 저장하고,
+ * 응답에서는 Instant로 변환한다.
  */
 @Service
 public class QuoteService {
 
+    private static final Logger log =
+            LoggerFactory.getLogger(QuoteService.class);
+
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
+
+    // 여러 서버 사이의 작은 시계 차이를 허용하는 범위.
+    private static final long FUTURE_TOLERANCE_SECONDS = 5;
 
     private final KiwoomHttpClient http;
     private final KiwoomAuthService auth;
@@ -46,7 +56,7 @@ public class QuoteService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    // 같은 서버에서 동일 종목을 동시에 수집하는 일을 줄인다.
+    // 같은 서버에서 동일 종목의 외부 조회가 겹치는 일을 줄인다.
     private final Object[] locks = IntStream.range(0, 64)
             .mapToObj(index -> new Object())
             .toArray();
@@ -67,6 +77,14 @@ public class QuoteService {
         );
         this.transaction.setIsolationLevel(
                 TransactionDefinition.ISOLATION_READ_COMMITTED
+        );
+
+        // 각 실행 인스턴스의 실제 JVM 시간 기준을 시작 로그에 남긴다.
+        log.info(
+                "[QUOTE][CLOCK_CONFIG] jvmZone={} storageZone={} nowUtc={}",
+                ZoneId.systemDefault(),
+                SEOUL,
+                Instant.now()
         );
     }
 
@@ -118,8 +136,8 @@ public class QuoteService {
     }
 
     /**
-     * 외부 API를 호출하지 않고 저장된 시세만 읽는다.
-     * 엔티티 대신 필요한 컬럼을 조회해 DTO로 반환한다.
+     * 외부 API를 호출하지 않고 DB에 저장된 시세를 읽는다.
+     * 이 메서드는 저장 시각을 현재 시각으로 변경하지 않는다.
      */
     public Quote saved(String code) {
         validateCode(code);
@@ -143,19 +161,52 @@ public class QuoteService {
     }
 
     /**
-     * 조회 시각뿐 아니라 가격·거래량도 확인한다.
-     * 거래량 0은 정상적으로 허용한다.
+     * 가격·거래량·수집 시각을 검사한다.
+     *
+     * 현재 주문 서비스는 seconds=15로 호출한다.
+     * 주문 검사가 실패하면 실제 사유를 로그에 기록한다.
      */
     public static boolean fresh(Quote quote, long seconds) {
-        if (quote == null || quote.fetchedAt() == null
-                || quote.currentPrice() <= 0 || quote.volume() < 0) {
-            return false;
+        Instant now = Instant.now();
+        String reason = null;
+
+        if (quote == null) {
+            reason = "QUOTE_MISSING";
+        } else if (quote.fetchedAt() == null) {
+            reason = "TIMESTAMP_MISSING";
+        } else if (quote.currentPrice() <= 0) {
+            reason = "INVALID_PRICE";
+        } else if (quote.volume() < 0) {
+            reason = "INVALID_VOLUME";
+        } else if (quote.fetchedAt().isAfter(
+                now.plusSeconds(FUTURE_TOLERANCE_SECONDS)
+        )) {
+            reason = "FUTURE_TIMESTAMP";
+        } else if (!quote.fetchedAt().isAfter(
+                now.minusSeconds(seconds)
+        )) {
+            reason = "STALE_TIMESTAMP";
         }
 
-        Instant now = Instant.now();
+        if (reason != null && seconds == 15) {
+            Long ageMillis = quote == null || quote.fetchedAt() == null
+                    ? null
+                    : Duration.between(quote.fetchedAt(), now).toMillis();
 
-        return !quote.fetchedAt().isAfter(now.plusSeconds(5))
-                && quote.fetchedAt().isAfter(now.minusSeconds(seconds));
+            log.warn(
+                    "[QUOTE][TRADE_QUOTE_REJECTED] "
+                            + "stock={} reason={} fetchedAt={} "
+                            + "checkedAt={} ageMillis={} maxAgeSeconds={}",
+                    quote == null ? "-" : safeCode(quote.stockCode()),
+                    reason,
+                    quote == null ? null : quote.fetchedAt(),
+                    now,
+                    ageMillis,
+                    seconds
+            );
+        }
+
+        return reason == null;
     }
 
     public Quote quote(String code, boolean force) {
@@ -196,14 +247,15 @@ public class QuoteService {
                     throw KiwoomApiException.invalidResponse();
                 }
 
+                /*
+                 * 정상 응답을 수신·검증한 시각이다.
+                 * DB 잠금 대기 후의 현재 시각으로 덮어쓰지 않는다.
+                 */
                 LocalDateTime received = LocalDateTime.now(SEOUL)
                         .withNano(0);
 
-                return transaction.execute(status -> {
-                    /*
-                     * 시세 행이 아직 없을 수도 있으므로 종목 행을 잠근다.
-                     * 여러 서버에서 수집해도 최초 시세 행 생성을 직렬화한다.
-                     */
+                Quote result = transaction.execute(status -> {
+                    // 최초 시세 생성과 동일 종목 갱신을 직렬화한다.
                     Stock managedStock = entityManager.find(
                             Stock.class,
                             stock.id(),
@@ -240,11 +292,44 @@ public class QuoteService {
 
                         entityManager.persist(current);
                     } else {
-                        // 영속성 컨텍스트에 예전 값이 있으면 DB 값으로 갱신한다.
+                        // 영속성 컨텍스트에 남은 예전 값 대신 DB 값을 읽는다.
                         entityManager.refresh(current);
 
-                        // 먼저 수집한 응답이 더 늦게 저장되는 경우를 막는다.
-                        if (!current.getUpdatedAt().isAfter(received)) {
+                        LocalDateTime previousTime = current.getUpdatedAt();
+                        LocalDateTime checkedAt = LocalDateTime.now(SEOUL);
+
+                        boolean invalidFutureTime = previousTime != null
+                                && previousTime.isAfter(
+                                checkedAt.plusSeconds(
+                                        FUTURE_TOLERANCE_SECONDS
+                                )
+                        );
+
+                        /*
+                         * 기존 값이 비정상적인 미래이면,
+                         * 새로 검증한 가격·거래량·시각을 함께 저장해 회복한다.
+                         *
+                         * 정상적인 더 최신 시세는 기존처럼 유지한다.
+                         */
+                        boolean shouldUpdate = previousTime == null
+                                || invalidFutureTime
+                                || !previousTime.isAfter(received);
+
+                        if (invalidFutureTime) {
+                            // 트랜잭션 안이므로 아직 커밋 완료를 뜻하지 않는다.
+                            log.warn(
+                                    "[QUOTE][FUTURE_TIMESTAMP_REPAIR_ATTEMPT] "
+                                            + "stock={} previousTime={} "
+                                            + "receivedTime={} checkedAt={} jvmZone={}",
+                                    safeCode(code),
+                                    previousTime,
+                                    received,
+                                    checkedAt,
+                                    ZoneId.systemDefault()
+                            );
+                        }
+
+                        if (shouldUpdate) {
                             current.refresh(
                                     price,
                                     change,
@@ -269,6 +354,24 @@ public class QuoteService {
                             current.getUpdatedAt().atZone(SEOUL).toInstant()
                     );
                 });
+
+                /*
+                 * transaction.execute가 정상 반환한 뒤 기록한다.
+                 * 새 키움 요청에서 받은 값과 반환 시세 시각을 비교할 수 있다.
+                 */
+                if (force && result != null) {
+                    log.info(
+                            "[QUOTE][TRADE_QUOTE_RETURNED] "
+                                    + "stock={} receivedTime={} fetchedAt={} nowUtc={}",
+                            safeCode(code),
+                            received,
+                            result.fetchedAt(),
+                            Instant.now()
+                    );
+                }
+
+                return result;
+
             } catch (NumberFormatException | ArithmeticException exception) {
                 throw KiwoomApiException.invalidResponse();
             }
@@ -342,6 +445,16 @@ public class QuoteService {
         }
     }
 
+    // 입력값의 개행 등으로 로그 구조가 깨지는 일을 막는다.
+    private static String safeCode(String code) {
+        if (code == null) {
+            return "-";
+        }
+
+        String cleaned = code.replaceAll("[^A-Za-z0-9_-]", "?");
+        return cleaned.substring(0, Math.min(cleaned.length(), 20));
+    }
+
     public List<StockInfo> featuredStocks() {
         return market.ranking().items().stream()
                 .limit(6)
@@ -355,8 +468,7 @@ public class QuoteService {
     }
 
     /**
-     * 기존 자동 수집 범위를 유지한다.
-     * 보유 종목과 거래대금 상위 종목을 주기적으로 갱신한다.
+     * 보유 종목과 거래대금 상위 종목을 수집 대상에 포함한다.
      */
     public List<String> trackedCodes() {
         List<String> heldCodes = transaction.execute(status ->
