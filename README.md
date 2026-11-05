@@ -8,42 +8,15 @@
 |---|---|---|
 | Java | **25 (LTS)** | |
 | Spring Boot | **4.1.0** | |
-| Gradle | **9.5.1 (Kotlin DSL)** | Gradle Wrapper 사용 — 별도 설치 불필요 |
-| DB | **MySQL 8** | Ubuntu Server에 구축 |
+| Gradle | **9.5.1** | |
+| DB | **MySQL 8** | AWS Server에 구축 |
 | ORM | **Spring Data JPA / Hibernate** | DB 접근 및 Entity 매핑 |
 | MySQL Driver | **MySQL Connector/J 9.7.0** | Spring Boot와 MySQL 연결 |
 
-### 주요 의존성
+## 배포 및 로그
 
-- **Spring Web MVC**: REST API 및 HTTP 요청/응답 처리
-- **Spring Data JPA**: Repository 기반 데이터 접근
-- **Validation**: 요청 데이터 유효성 검증
-- **Actuator**: 애플리케이션 상태 확인 및 모니터링
-- **MySQL Connector/J**: Spring Boot와 MySQL 연결
-- **Lombok**: Getter, Builder 등의 반복 코드 간소화
+Jenkins가 GitHub 변경 사항을 확인해 백엔드를 빌드하고 Docker 이미지를 Amazon ECR에 저장합니다. AWS Systems Manager를 통해 EC2에서 배포 명령을 실행하고 Docker Compose로 서비스를 구동합니다.
 
-## 실행
+운영 환경에서는 Nginx가 HTTPS 연결을 처리하고 `/api/` 요청을 Spring Boot로 전달합니다. 백엔드는 Logback으로 `/app/logs/application.log`에 로그를 기록합니다. 이 디렉터리를 EC2 호스트의 `/var/log/a-stock-simulator`에 연결하고, CloudWatch Agent가 파일을 읽어 `/a-stock-simulator/backend` 로그 그룹으로 전송하도록 구성했습니다.
 
-### IntelliJ IDEA
-
-메인 애플리케이션 클래스의 `main()` 메서드를 실행하거나 IntelliJ IDEA의 Run(▶) 버튼을 통해 실행한다.
-
-### Gradle
-
-터미널에서 실행하는 경우:
-
-```bash
-./gradlew bootRun
-```
-
-확인:
-
-- 애플리케이션: http://localhost:8080
-- 헬스체크: http://localhost:8080/actuator/health
-
-빌드 / 테스트:
-
-```bash
-./gradlew build     # 컴파일 + 테스트 + jar
-./gradlew test      # 테스트 코드만 실행
-```
+주소 : https://stock.prac.click/
