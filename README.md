@@ -20,3 +20,5 @@ Jenkins가 GitHub 변경 사항을 확인해 백엔드를 빌드하고 Docker �
 운영 환경에서는 Nginx가 HTTPS 연결을 처리하고 `/api/` 요청을 Spring Boot로 전달합니다. 백엔드는 Logback으로 `/app/logs/application.log`에 로그를 기록합니다. 이 디렉터리를 EC2 호스트의 `/var/log/a-stock-simulator`에 연결하고, CloudWatch Agent가 파일을 읽어 `/a-stock-simulator/backend` 로그 그룹으로 전송하도록 구성했습니다.
 
 주소 : https://stock.prac.click/
+ID : abcd
+PW : abcd1234@
