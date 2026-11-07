@@ -129,7 +129,7 @@ dependencies {
 
     /**
      * 애플리케이션 상태 확인 및 모니터링 기능
-     *
+     * 취약점수정
      * /actuator/health 등의 엔드포인트를 제공한다.
      */
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
